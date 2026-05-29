@@ -1,10 +1,11 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ClinicManager.Models;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace ClinicManager.Controllers;
 
-public class HomeController : Controller
+public class HomeController(ILogger<HomeController> logger) : Controller
 {
     public IActionResult Index()
     {

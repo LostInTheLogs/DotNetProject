@@ -483,3 +483,5 @@ $RECYCLE.BIN/
 
 # Custom excludes for Clinic Management System
 wwwroot/lib/
+ClinicManager/Logs/*
+!ClinicManager/Logs/.gitkeep
