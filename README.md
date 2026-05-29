@@ -39,14 +39,30 @@ The project is structured as follows:
 *   .NET 10 SDK
 *   Docker & Docker Compose (for SQL Server database)
 
+### Initial Setup (First Time Only)
+
+Before running the application for the first time, restore the local repository development tools
+
+1. Restore the local tools defined in the repository manifest:
+   ```bash
+   dotnet tool restore
+   ```
+
+---
+
 ### How to Run
 
-1.  Start the SQL Server database using Docker Compose (details in Faza 1 Commit 3).
-2.  Restore dependencies:
-    ```bash
-    dotnet restore
-    ```
-3.  Apply migrations and start the application:
-    ```bash
-    dotnet run --project ClinicManager
-    ```
+1. **Start the Database Infrastructure:** Spin up the containerized SQL Server instance via Docker Compose (the `docker-compose.yml` file is located in the solution root):
+   ```bash
+   docker compose up -d
+   ```
+
+2. **Restore Dependencies:** Pull down the required NuGet packages (including NLog, EF Core, and Identity):
+   ```bash
+   dotnet restore
+   ```
+
+3. **Run the Application:** Launch the web server. The application automatically handles pending EF Core schema migrations and runs the master system data seeder (`DataSeeder`) upon startup:
+   ```bash
+   dotnet run --project ClinicManager
+   ```
