@@ -26,6 +26,13 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.LogoutPath = "/Account/Logout";
+});
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<ClinicMapper>();
 
@@ -71,7 +78,8 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var loggerInstance = services.GetRequiredService<ILogger<Program>>();
-        loggerInstance.LogCritical(ex, "An unhandled exception occurred during database seed/migration tasks.");
+        loggerInstance.LogCritical(ex, "Database seed/migration failed. Application cannot start.");
+        throw;
     }
 }
 
