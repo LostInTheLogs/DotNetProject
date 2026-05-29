@@ -26,4 +26,5 @@ public class Visit
     // Navigation properties
     public ICollection<ProcedurePerformed> ProceduresPerformed { get; set; } = new List<ProcedurePerformed>();
     public ICollection<ClinicalNote> ClinicalNotes { get; set; } = new List<ClinicalNote>();
+    public virtual ICollection<PrescribedMedication> Prescriptions { get; set; } = new List<PrescribedMedication>();
 }
