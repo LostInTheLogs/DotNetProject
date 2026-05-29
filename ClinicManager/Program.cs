@@ -1,4 +1,5 @@
 using ClinicManager.Data;
+using ClinicManager.Mappers;
 using ClinicManager.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<ClinicMapper>();
 
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();
