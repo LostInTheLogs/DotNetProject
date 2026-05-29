@@ -2,6 +2,7 @@ using ClinicManager.Data;
 using ClinicManager.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 builder.Services.AddControllersWithViews();
+
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();  
 
 var app = builder.Build();
 
