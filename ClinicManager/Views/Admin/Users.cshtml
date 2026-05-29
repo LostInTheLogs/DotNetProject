@@ -1,0 +1,78 @@
+@using ClinicManager.Models
+@model IList<ApplicationUser>
+@{
+    ViewData["Title"] = "User Management";
+    var userRoles = ViewBag.UserRoles as Dictionary<string, IList<string>>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-0">👥 User Management</h1>
+        <p class="text-muted small mb-0">Admin panel – list of accounts and assigned roles</p>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        ✅ @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="admin-users-table">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Roles</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        var roles = userRoles?.ContainsKey(user.Id) == true
+                            ? userRoles[user.Id]
+                            : new List<string>();
+
+                        <tr>
+                            <td class="align-middle fw-semibold">@user.FirstName @user.LastName</td>
+                            <td class="align-middle text-muted">@user.Email</td>
+                            <td class="align-middle">
+                                @if (roles.Any())
+                                {
+                                    @foreach (var role in roles)
+                                    {
+                                        var badgeClass = role switch
+                                        {
+                                            "Admin" => "bg-danger",
+                                            "Doctor" => "bg-primary",
+                                            "Receptionist" => "bg-success",
+                                            _ => "bg-secondary"
+                                        };
+                                        <span class="badge @badgeClass me-1">@role</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">No roles</span>
+                                }
+                            </td>
+                            <td class="align-middle text-end">
+                                <a asp-action="ManageRoles" asp-route-userId="@user.Id"
+                                   class="btn btn-sm btn-outline-primary"
+                                   id="manage-roles-@user.Id">
+                                    Manage Roles
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

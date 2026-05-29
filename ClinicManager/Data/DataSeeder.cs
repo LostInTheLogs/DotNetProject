@@ -19,7 +19,25 @@ public static class DataSeeder
         }
 
         // 2. Seed Default Staff Accounts
-        if (!await userManager.Users.AnyAsync())
+        string adminEmail = "admin@clinic.com";
+
+        if (!await userManager.Users.AnyAsync(u => u.Email == adminEmail))
+        {
+            var admin = new ApplicationUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                FirstName = "Admin",
+                LastName = "System",
+                EmailConfirmed = true
+            };
+            var createResult = await userManager.CreateAsync(admin, "Admin@2026!");
+            if (!createResult.Succeeded)
+                throw new Exception($"Failed to create admin user: {string.Join(", ", createResult.Errors.Select(e => e.Description))}");
+            await userManager.AddToRoleAsync(admin, "Admin");
+        }
+
+        if (!await userManager.Users.AnyAsync(u => u.Email == "dr.kowalski@clinic.com"))
         {
             var doctor = new ApplicationUser
             {
@@ -31,7 +49,10 @@ public static class DataSeeder
             };
             await userManager.CreateAsync(doctor, "ClinicSecure2026!");
             await userManager.AddToRoleAsync(doctor, "Doctor");
+        }
 
+        if (!await userManager.Users.AnyAsync(u => u.Email == "anna.nowak@clinic.com"))
+        {
             var receptionist = new ApplicationUser
             {
                 UserName = "anna.nowak@clinic.com",
@@ -48,9 +69,9 @@ public static class DataSeeder
         if (!await context.MedicalProcedures.AnyAsync())
         {
             context.MedicalProcedures.AddRange(
-                new MedicalProcedure { Name = "Standardowa konsultacja lekarska", Description = "Podstawowe badanie ogólne wraz z wywiadem chorobowym.", ServiceCost = 150.00m },
-                new MedicalProcedure { Name = "USG Jamy Brzusznej", Description = "Badanie ultrasonograficzne narządów wewnętrznych.", ServiceCost = 220.00m },
-                new MedicalProcedure { Name = "EKG spoczynkowe", Description = "Badanie elektrokardiograficzne z wydrukiem i opisem.", ServiceCost = 80.00m }
+                new MedicalProcedure { Name = "Standard Medical Consultation", Description = "Basic general examination with medical history interview.", ServiceCost = 150.00m },
+                new MedicalProcedure { Name = "Abdominal Ultrasound", Description = "Ultrasound examination of internal organs.", ServiceCost = 220.00m },
+                new MedicalProcedure { Name = "Resting ECG", Description = "Electrocardiogram with printout and description.", ServiceCost = 80.00m }
             );
         }
 
@@ -58,9 +79,9 @@ public static class DataSeeder
         if (!await context.Medications.AnyAsync())
         {
             context.Medications.AddRange(
-                new Medication { Name = "Amotaks 500mg", Description = "Antybiotyk o szerokim spektrum (Amoxicillinum).", UnitPrice = 34.20m, IsAvailable = true },
-                new Medication { Name = "Paracetamol Accord", Description = "Lek przeciwbólowy i przeciwgorączkowy.", UnitPrice = 12.50m, IsAvailable = true },
-                new Medication { Name = "Xarelto 20mg", Description = "Doustny lek przeciwzakrzepowy nowej generacji.", UnitPrice = 139.90m, IsAvailable = true }
+                new Medication { Name = "Amotaks 500mg", Description = "Broad-spectrum antibiotic (Amoxicillin).", UnitPrice = 34.20m, IsAvailable = true },
+                new Medication { Name = "Paracetamol Accord", Description = "Pain reliever and antipyretic.", UnitPrice = 12.50m, IsAvailable = true },
+                new Medication { Name = "Xarelto 20mg", Description = "Novel oral anticoagulant.", UnitPrice = 139.90m, IsAvailable = true }
             );
         }
 
