@@ -301,7 +301,7 @@ namespace ClinicManager.Migrations
                     b.Property<int>("MedicationId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProcedurePerformedId")
+                    b.Property<int?>("ProcedurePerformedId")
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
@@ -311,11 +311,16 @@ namespace ClinicManager.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("VisitId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("MedicationId");
 
                     b.HasIndex("ProcedurePerformedId");
+
+                    b.HasIndex("VisitId");
 
                     b.ToTable("PrescribedMedications");
                 });
@@ -566,15 +571,19 @@ namespace ClinicManager.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ClinicManager.Models.ProcedurePerformed", "ProcedurePerformed")
+                    b.HasOne("ClinicManager.Models.ProcedurePerformed", null)
                         .WithMany("PrescribedMedications")
-                        .HasForeignKey("ProcedurePerformedId")
+                        .HasForeignKey("ProcedurePerformedId");
+
+                    b.HasOne("ClinicManager.Models.Visit", "Visit")
+                        .WithMany("Prescriptions")
+                        .HasForeignKey("VisitId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Medication");
 
-                    b.Navigation("ProcedurePerformed");
+                    b.Navigation("Visit");
                 });
 
             modelBuilder.Entity("ClinicManager.Models.ProcedurePerformed", b =>
@@ -686,6 +695,8 @@ namespace ClinicManager.Migrations
             modelBuilder.Entity("ClinicManager.Models.Visit", b =>
                 {
                     b.Navigation("ClinicalNotes");
+
+                    b.Navigation("Prescriptions");
 
                     b.Navigation("ProceduresPerformed");
                 });
