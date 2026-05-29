@@ -15,19 +15,19 @@ public record PatientResponseDto(
 );
 
 public record CreatePatientRequestDto(
-    [Required] [MaxLength(50)] string FirstName,
-    [Required] [MaxLength(50)] string LastName,
-    [Required] [StringLength(11, MinimumLength = 11)] string Pesel,
-    [Required] [MaxLength(30)] string InsuranceNumber,
-    [Required] [Phone] [MaxLength(20)] string Phone,
-    [Required] [EmailAddress] [MaxLength(100)] string Email,
-    [Required] [MaxLength(200)] string Address
+    [Required][MaxLength(50)] string FirstName,
+    [Required][MaxLength(50)] string LastName,
+    [Required][StringLength(11, MinimumLength = 11)] string Pesel,
+    [Required][MaxLength(30)] string InsuranceNumber,
+    [Required][Phone][MaxLength(20)] string Phone,
+    [Required][EmailAddress][MaxLength(100)] string Email,
+    [Required][MaxLength(200)] string Address
 );
 
 public record UpdatePatientRequestDto(
-    [Required] [MaxLength(50)] string FirstName,
-    [Required] [MaxLength(50)] string LastName,
-    [Required] [Phone] [MaxLength(20)] string Phone,
-    [Required] [EmailAddress] [MaxLength(100)] string Email,
-    [Required] [MaxLength(200)] string Address
+    [Required][MaxLength(50)] string FirstName,
+    [Required][MaxLength(50)] string LastName,
+    [Required][Phone][MaxLength(20)] string Phone,
+    [Required][EmailAddress][MaxLength(100)] string Email,
+    [Required][MaxLength(200)] string Address
 );

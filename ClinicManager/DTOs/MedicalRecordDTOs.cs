@@ -14,6 +14,6 @@ public record MedicalRecordResponseDto
 
 public record UploadMedicalRecordRequestDto(
     [Required] int PatientId,
-    [Required] [MaxLength(100)] string DocumentType,
+    [Required][MaxLength(100)] string DocumentType,
     [MaxLength(500)] string Description
 );
