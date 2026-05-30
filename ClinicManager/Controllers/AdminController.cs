@@ -159,4 +159,36 @@ public class AdminController(
         TempData["Success"] = $"Roles for user {user.FirstName} {user.LastName} have been updated.";
         return RedirectToAction(nameof(Users));
     }
+
+    // POST: /Admin/DeleteUser
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteUser(string userId)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user == null) return NotFound();
+
+        var userName = $"{user.FirstName} {user.LastName}";
+
+        try
+        {
+            var result = await userManager.DeleteAsync(user);
+
+            if (result.Succeeded)
+            {
+                logger.LogInformation("Admin deleted user {Email}.", user.Email);
+                TempData["Success"] = $"User {userName} has been deleted.";
+            }
+            else
+            {
+                TempData["Success"] = $"Failed to delete user {userName}: {string.Join(", ", result.Errors.Select(e => e.Description))}";
+            }
+        }
+        catch (DbUpdateException)
+        {
+            TempData["Success"] = $"Cannot delete {userName}. User has associated records (e.g., visits or clinical notes) in the system.";
+        }
+
+        return RedirectToAction(nameof(Users));
+    }
 }
