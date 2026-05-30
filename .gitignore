@@ -485,3 +485,5 @@ $RECYCLE.BIN/
 wwwroot/lib/
 ClinicManager/Logs/*
 !ClinicManager/Logs/.gitkeep
+ClinicManager/wwwroot/uploads/*
+!ClinicManager/wwwroot/uploads/.gitkeep

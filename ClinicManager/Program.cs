@@ -37,6 +37,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<ClinicMapper>();
 builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
 
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();

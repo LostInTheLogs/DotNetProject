@@ -1,3 +1,4 @@
+using ClinicManager.Data;
 using ClinicManager.DTOs;
 using ClinicManager.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -8,6 +9,8 @@ namespace ClinicManager.Controllers;
 [Authorize(Roles = "Admin,Doctor,Receptionist")]
 public class PatientController(
     IPatientService patientService,
+    IMedicalRecordService recordService,
+    ApplicationDbContext context, 
     ILogger<PatientController> logger) : Controller
 {
     // GET: /Patient
@@ -25,7 +28,22 @@ public class PatientController(
         if (patient == null)
             return NotFound();
 
+        ViewBag.MedicalRecords = await recordService.GetByPatientIdAsync(id);
         return View(patient);
+    }
+    
+    // PATCH/POST: /Patient/UpdateRecordDescription (AJAX Endpoint for Editing Inline)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateRecordDescription(int id, string description)
+    {
+        var record = await context.MedicalRecords.FindAsync(id);
+        if (record == null) return NotFound();
+
+        record.Description = description ?? string.Empty;
+        await context.SaveChangesAsync();
+
+        return Json(new { success = true, message = "Description updated successfully." });
     }
 
     // GET: /Patient/Create
@@ -113,5 +131,55 @@ public class PatientController(
         TempData["Success"] = $"Patient {fullName} has been deleted.";
         logger.LogInformation("Soft-deleted patient {PatientId} via form.", id);
         return RedirectToAction(nameof(Index));
+    }
+    // GET: /Patient/MedicalRecords/{patientId}
+    [HttpGet]
+    public async Task<IActionResult> MedicalRecords(int patientId)
+    {
+        ViewBag.PatientId = patientId;
+        var records = await recordService.GetByPatientIdAsync(patientId);
+        return View(records);
+    }
+
+    // POST: /Patient/UploadRecord
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UploadRecord(UploadMedicalRecordRequestDto dto, IFormFile file)
+    {
+        if (!ModelState.IsValid)
+        {
+            TempData["Error"] = "The provided record details are invalid.";
+            return RedirectToAction(nameof(MedicalRecords), new { patientId = dto.PatientId });
+        }
+
+        try
+        {
+            await recordService.UploadRecordAsync(dto, file);
+            TempData["Success"] = "Medical document uploaded successfully.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Upload failed: {ex.Message}";
+        }
+
+        return RedirectToAction(nameof(Details), new { id = dto.PatientId });
+    }
+
+    // POST: /Patient/DeleteRecord
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteRecord(int id, int patientId)
+    {
+        var success = await recordService.DeleteRecordAsync(id);
+        if (success)
+        {
+            TempData["Success"] = "Document was removed from records.";
+        }
+        else
+        {
+            TempData["Error"] = "Failed to remove the requested file asset.";
+        }
+
+        return RedirectToAction(nameof(Details), new {id = patientId });
     }
 }
