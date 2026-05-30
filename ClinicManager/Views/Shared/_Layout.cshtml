@@ -38,6 +38,16 @@
                                     Visits
                                 </a>
                             </li>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Medication" asp-action="Index"
+                                       id="nav-patients">
+                                        Medications
+                                    </a>
+                                </li>
+                            }
+
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
