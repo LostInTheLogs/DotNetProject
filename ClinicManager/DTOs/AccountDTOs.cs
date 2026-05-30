@@ -48,6 +48,30 @@ public class RegisterDto
     public string ConfirmPassword { get; set; } = string.Empty;
 }
 
+public class CreateStaffDto
+{
+    [Required(ErrorMessage = "First name is required.")]
+    [MaxLength(100)]
+    [Display(Name = "First Name")]
+    public string FirstName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Last name is required.")]
+    [MaxLength(100)]
+    [Display(Name = "Last Name")]
+    public string LastName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Email address is required.")]
+    [EmailAddress(ErrorMessage = "Enter a valid email address.")]
+    [Display(Name = "Email")]
+    public string Email { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Role is required.")]
+    [Display(Name = "Role")]
+    public string SelectedRole { get; set; } = string.Empty;
+
+    public List<string> AvailableRoles { get; set; } = new();
+}
+
 public class ManageRolesDto
 {
     public string UserId { get; set; } = string.Empty;

@@ -1,0 +1,67 @@
+@model ClinicManager.DTOs.CreateStaffDto
+@{
+    ViewData["Title"] = "Create Staff";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="d-flex align-items-center mb-4">
+            <a asp-action="Users" class="btn btn-sm btn-outline-secondary me-3" id="create-staff-back">
+                ← Back
+            </a>
+            <div>
+                <h1 class="h4 fw-bold mb-0">➕ Create Staff Account</h1>
+                <p class="text-muted small mb-0">Register a new staff member with a generated password</p>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form asp-action="CreateStaff" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="FirstName" class="form-label fw-semibold"></label>
+                            <input asp-for="FirstName" class="form-control" placeholder="John" id="staff-firstname" />
+                            <span asp-validation-for="FirstName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="LastName" class="form-label fw-semibold"></label>
+                            <input asp-for="LastName" class="form-control" placeholder="Smith" id="staff-lastname" />
+                            <span asp-validation-for="LastName" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold"></label>
+                        <input asp-for="Email" class="form-control" placeholder="staff@clinic.com" autocomplete="off" id="staff-email" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="SelectedRole" class="form-label fw-semibold"></label>
+                        <select asp-for="SelectedRole" asp-items="@(new SelectList(Model.AvailableRoles))" class="form-select" id="staff-role">
+                            <option value="">-- Select Role --</option>
+                        </select>
+                        <span asp-validation-for="SelectedRole" class="text-danger small"></span>
+                    </div>
+
+                    <div class="alert alert-info py-2 small" role="alert">
+                        🔑 A secure password will be generated automatically and shown after creation.
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" id="create-staff-submit">
+                            Create Staff Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
