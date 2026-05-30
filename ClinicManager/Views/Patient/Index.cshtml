@@ -1,0 +1,121 @@
+@model List<ClinicManager.DTOs.PatientResponseDto>
+@{
+    ViewData["Title"] = "Patients";
+    var currentSearch = ViewData["CurrentSearch"] as string ?? string.Empty;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-0">Patients</h1>
+        <p class="text-muted small mb-0">Browse, search, and manage patient records</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary" id="add-patient-btn">
+        + Add Patient
+    </a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-2 align-items-end" id="patient-search-form">
+            <div class="col-md-6">
+                <label for="searchTerm" class="form-label fw-semibold small">Search</label>
+                <div class="input-group">
+                    <input type="text" id="searchTerm" name="searchTerm" value="@currentSearch"
+                           class="form-control" placeholder="Search by PESEL, last name, or first name..." />
+                    <button type="submit" class="btn btn-outline-primary" id="patient-search-btn">Search</button>
+                    @if (!string.IsNullOrEmpty(currentSearch))
+                    {
+                        <a asp-action="Index" class="btn btn-outline-secondary" id="patient-search-clear">Clear</a>
+                    }
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        @if (Model.Count == 0)
+        {
+            <div class="text-center py-5">
+                <p class="text-muted mb-0">
+                    @if (!string.IsNullOrEmpty(currentSearch))
+                    {
+                        <text>No patients found matching "@currentSearch".</text>
+                    }
+                    else
+                    {
+                        <text>No patients registered yet.</text>
+                    }
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="patients-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Name</th>
+                            <th>PESEL</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Registered</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var patient in Model)
+                        {
+                            <tr>
+                                <td class="align-middle fw-semibold">
+                                    <a asp-action="Details" asp-route-id="@patient.Id" class="text-decoration-none">
+                                        @patient.FirstName @patient.LastName
+                                    </a>
+                                </td>
+                                <td class="align-middle text-muted font-monospace small">@patient.Pesel</td>
+                                <td class="align-middle">@patient.Phone</td>
+                                <td class="align-middle">@patient.Email</td>
+                                <td class="align-middle small text-muted">@patient.CreatedAt.ToString("yyyy-MM-dd")</td>
+                                <td class="align-middle text-end">
+                                    <a asp-action="Details" asp-route-id="@patient.Id"
+                                       class="btn btn-sm btn-outline-info me-1" id="patient-details-@patient.Id">
+                                        Details
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@patient.Id"
+                                       class="btn btn-sm btn-outline-primary me-1" id="patient-edit-@patient.Id">
+                                        Edit
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@patient.Id" method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Are you sure you want to delete patient @patient.FirstName @patient.LastName? This action cannot be undone.');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                id="patient-delete-@patient.Id">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
