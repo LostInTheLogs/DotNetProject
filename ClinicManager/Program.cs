@@ -1,5 +1,6 @@
 using ClinicManager.Data;
 using ClinicManager.Mappers;
+using ClinicManager.Services;
 using ClinicManager.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<ClinicMapper>();
+builder.Services.AddScoped<IPatientService, PatientService>();
 
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();
