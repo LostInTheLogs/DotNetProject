@@ -23,10 +23,15 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Patient" asp-action="Index" id="nav-patients">
+                                    Patients
+                                </a>
+                            </li>
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
@@ -41,29 +46,17 @@
                     <ul class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button"
-                                   data-bs-toggle="dropdown" aria-expanded="false" id="nav-user-menu">
+                            <li class="nav-item">
+                                <span class="nav-link text-light">
                                     👤 @User.Identity.Name
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    @if (User.IsInRole("Admin"))
-                                    {
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Users">
-                                                Manage Users
-                                            </a>
-                                        </li>
-                                        <li><hr class="dropdown-divider" /></li>
-                                    }
-                                    <li>
-                                        <form asp-controller="Account" asp-action="Logout" method="post" id="logout-form">
-                                            <button type="submit" class="dropdown-item text-danger" id="nav-logout">
-                                                🚪 Logout
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
+                                </span>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline" id="logout-form">
+                                    <button type="submit" class="btn btn-outline-light btn-sm my-1" id="nav-logout">
+                                        🚪 Logout
+                                    </button>
+                                </form>
                             </li>
                         }
                         else
@@ -71,11 +64,6 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Account" asp-action="Login" id="nav-login">
                                     🔑 Sign In
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Register" id="nav-register">
-                                    📝 Register
                                 </a>
                             </li>
                         }
