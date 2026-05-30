@@ -13,6 +13,22 @@
     </div>
 </div>
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <div class="row g-4">
     <div class="col-md-6">
         <div class="card border-0 shadow-sm h-100">
@@ -72,3 +88,232 @@
         </button>
     </form>
 </div>
+
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-transparent fw-semibold border-bottom py-3">
+        <span><i class="bi bi-folder2-open me-2 text-primary"></i>Medical Records & Document Uploads</span>
+    </div>
+    <div class="card-body p-4">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="p-3 bg-light rounded border border-light-subtle">
+                    <h6 class="fw-bold mb-3 small text-uppercase text-muted">Upload New Attachment</h6>
+                    <form asp-action="UploadRecord" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="PatientId" value="@Model.Id"/>
+
+                        <div class="mb-2">
+                            <label class="form-label small mb-1 fw-semibold">Document Type</label>
+                            <select name="DocumentType" class="form-select form-select-sm" required>
+                                <option value="">-- Select Type --</option>
+                                <option value="Lab Result">Lab Result</option>
+                                <option value="Referral Letter">Referral Letter</option>
+                                <option value="X-Ray / Scan Report">X-Ray / Scan Report</option>
+                                <option value="Patient Consent Form">Patient Consent Form</option>
+                                <option value="Hospital Discharge Summary">Hospital Discharge Summary</option>
+                                <option value="Other">Other External Record</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small mb-1 fw-semibold">Description / Notes</label>
+                            <textarea name="Description" class="form-control form-control-sm" rows="2"
+                                      placeholder="Add clinical index notes..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small mb-1 fw-semibold">Select File (Max 5MB: PDF, JPG,
+                                PNG)</label>
+                            <input type="file" name="file" class="form-control form-control-sm"
+                                   accept=".pdf,.jpg,.jpeg,.png" required/>
+                        </div>
+
+                        <button type="submit" class="btn btn-sm btn-primary w-100 fw-semibold">Upload To Chart</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                @{
+                    var records = ViewBag.MedicalRecords as IEnumerable<ClinicManager.DTOs.MedicalRecordResponseDto> ?? new List<ClinicManager.DTOs.MedicalRecordResponseDto>();
+                }
+                @if (!records.Any())
+                {
+                    <div
+                        class="text-center py-5 text-muted border rounded border-dashed bg-light-subtle h-100 d-flex flex-column align-items-center justify-content-center">
+                        <i class="bi bi-file-earmark-zip d-block mb-2 text-secondary fs-4"></i>
+                        <span class="small">No scanned record attachments linked to this patient chart.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive border rounded bg-white">
+                        <table class="table table-hover align-middle mb-0 text-sm small">
+                            <thead class="table-light text-muted fw-semibold">
+                            <tr>
+                                <th class="ps-3 py-2">Type</th>
+                                <th class="py-2">Description (Double-click to Edit)</th>
+                                <th class="py-2">Uploaded</th>
+                                <th class="text-end pe-3 py-2">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var record in records)
+                            {
+                                <tr id="row-@record.Id">
+                                    <td class="ps-3"><span class="badge bg-secondary">@record.DocumentType</span></td>
+                                    <td>
+                                        <div class="editable-wrapper" data-id="@record.Id">
+                                                <span class="desc-text text-dark clickable-edit-field">
+                                                    @(string.IsNullOrWhiteSpace(record.Description) ? "Click to add description..." : record.Description)
+                                                </span>
+                                            <div class="input-group input-group-sm edit-input-field d-none">
+                                                <input type="text" class="form-control form-control-sm desc-input"
+                                                       value="@record.Description"/>
+                                                <button class="btn btn-success btn-save-desc" type="button">
+                                                    <i class="bi bi-check-lg fw-bold fs-6"></i>
+                                                </button>
+                                                <button class="btn btn-secondary btn-cancel-desc" type="button">
+                                                    <i class="bi bi-x-lg fw-bold fs-6"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">@record.UploadedAt.ToString("yyyy-MM-dd")</td>
+                                    <td class="text-end pe-3">
+                                        <div class="d-inline-flex gap-1">
+                                            <button type="button" class="btn btn-xs btn-info text-white btn-preview"
+                                                    data-url="@record.DocumentScanUrl"
+                                                    data-title="@record.DocumentType">
+                                                <i class="bi bi-eye-fill fs-6"></i>
+                                            </button>
+
+                                            <form asp-action="DeleteRecord" method="post"
+                                                  onsubmit="return confirm('Delete document?');"
+                                                  class="d-inline-block m-0 p-0">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@record.Id"/>
+                                                <input type="hidden" name="patientId" value="@Model.Id"/>
+                                                <button type="submit" class="btn btn-xs btn-outline-danger">
+                                                    <i class="bi bi-trash-fill fs-6"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white py-2">
+                <h6 class="modal-title" id="previewTitle">Document Viewer</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" style="height: 70vh;">
+                <embed id="previewEmbed" src="" type="application/pdf" width="100%" height="100%"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Modal Document View Configuration 
+            const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+            const embedElement = document.getElementById('previewEmbed');
+            const titleElement = document.getElementById('previewTitle');
+
+            document.querySelectorAll('.btn-preview').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    titleElement.textContent = `Document Scan: ${this.getAttribute('data-title')}`;
+                    embedElement.setAttribute('src', this.getAttribute('data-url'));
+                    previewModal.show();
+                });
+            });
+
+            document.getElementById('previewModal').addEventListener('hidden.bs.modal', () => embedElement.setAttribute('src', ''));
+
+            // Click-to-Edit Description Script Logic
+            document.querySelectorAll('.clickable-edit-field').forEach(field => {
+                field.addEventListener('click', function () {
+                    const wrapper = this.closest('.editable-wrapper');
+                    wrapper.querySelector('.desc-text').classList.add('d-none');
+                    wrapper.querySelector('.edit-input-field').classList.remove('d-none');
+                    wrapper.querySelector('.desc-input').focus();
+                });
+            });
+
+            document.querySelectorAll('.btn-cancel-desc').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const wrapper = this.closest('.editable-wrapper');
+                    wrapper.querySelector('.desc-text').classList.remove('d-none');
+                    wrapper.querySelector('.edit-input-field').classList.add('d-none');
+                });
+            });
+
+            document.querySelectorAll('.btn-save-desc').forEach(btn => {
+                btn.addEventListener('click', async function () {
+                    const wrapper = this.closest('.editable-wrapper');
+                    const recordId = wrapper.getAttribute('data-id');
+                    const newText = wrapper.querySelector('.desc-input').value;
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                    const formData = new FormData();
+                    formData.append("id", recordId);
+                    formData.append("description", newText);
+                    formData.append("__RequestVerificationToken", token);
+
+                    try {
+                        const response = await fetch('/Patient/UpdateRecordDescription', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        if (response.ok) {
+                            wrapper.querySelector('.desc-text').textContent = newText.trim() === "" ? "Click to add description..." : newText;
+                            wrapper.querySelector('.desc-text').classList.remove('d-none');
+                            wrapper.querySelector('.edit-input-field').classList.add('d-none');
+                        } else {
+                            alert("Failed to update database description.");
+                        }
+                    } catch {
+                        alert("An unexpected transport error occurred.");
+                    }
+                });
+            });
+        });
+    </script>
+    <style>
+        .clickable-edit-field {
+            cursor: pointer;
+            border-bottom: 1px dashed #6c757d;
+            display: inline-block;
+            width: 100%;
+            min-height: 20px;
+        }
+
+        .clickable-edit-field:hover {
+            background-color: #f8f9fa;
+            color: #0d6efd !important;
+        }
+
+        .btn-xs {
+            padding: 0.15rem 0.35rem;
+            font-size: 0.72rem;
+            border-radius: 0.2rem;
+        }
+
+        .border-dashed {
+            border-style: dashed !important;
+        }
+    </style>
+}
