@@ -1,0 +1,74 @@
+@model ClinicManager.DTOs.PatientResponseDto
+@{
+    ViewData["Title"] = $"{Model.FirstName} {Model.LastName}";
+}
+
+<div class="d-flex align-items-center mb-4">
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary me-3" id="patient-details-back">
+        ← Back to List
+    </a>
+    <div>
+        <h1 class="h4 fw-bold mb-0">@Model.FirstName @Model.LastName</h1>
+        <p class="text-muted small mb-0">Patient details and personal information</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent fw-semibold border-bottom">
+                Personal Information
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted small">First Name</dt>
+                    <dd class="col-sm-8">@Model.FirstName</dd>
+
+                    <dt class="col-sm-4 text-muted small">Last Name</dt>
+                    <dd class="col-sm-8">@Model.LastName</dd>
+
+                    <dt class="col-sm-4 text-muted small">PESEL</dt>
+                    <dd class="col-sm-8 font-monospace">@Model.Pesel</dd>
+
+                    <dt class="col-sm-4 text-muted small">Insurance No.</dt>
+                    <dd class="col-sm-8">@Model.InsuranceNumber</dd>
+
+                    <dt class="col-sm-4 text-muted small">Registered</dt>
+                    <dd class="col-sm-8">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent fw-semibold border-bottom">
+                Contact Information
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted small">Phone</dt>
+                    <dd class="col-sm-8">@Model.Phone</dd>
+
+                    <dt class="col-sm-4 text-muted small">Email</dt>
+                    <dd class="col-sm-8">@Model.Email</dd>
+
+                    <dt class="col-sm-4 text-muted small">Address</dt>
+                    <dd class="col-sm-8">@Model.Address</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4 d-flex gap-2">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary" id="patient-edit-btn">
+        Edit Patient
+    </a>
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline"
+          onsubmit="return confirm('Are you sure you want to delete @Model.FirstName @Model.LastName?');">
+        <button type="submit" class="btn btn-outline-danger" id="patient-delete-btn">
+            Delete Patient
+        </button>
+    </form>
+</div>

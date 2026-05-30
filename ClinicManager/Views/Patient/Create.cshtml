@@ -1,0 +1,82 @@
+@model ClinicManager.DTOs.CreatePatientRequestDto
+@{
+    ViewData["Title"] = "Register Patient";
+}
+
+<div class="d-flex align-items-center mb-4">
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary me-3" id="patient-create-back">
+        ← Back to List
+    </a>
+    <div>
+        <h1 class="h4 fw-bold mb-0">Register Patient</h1>
+        <p class="text-muted small mb-0">Fill in the form to add a new patient to the registry</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="FirstName" class="form-label fw-semibold"></label>
+                            <input asp-for="FirstName" class="form-control" placeholder="First name" id="patient-first-name" />
+                            <span asp-validation-for="FirstName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="LastName" class="form-label fw-semibold"></label>
+                            <input asp-for="LastName" class="form-control" placeholder="Last name" id="patient-last-name" />
+                            <span asp-validation-for="LastName" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Pesel" class="form-label fw-semibold"></label>
+                            <input asp-for="Pesel" class="form-control font-monospace" placeholder="11-digit PESEL" id="patient-pesel" />
+                            <span asp-validation-for="Pesel" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="InsuranceNumber" class="form-label fw-semibold"></label>
+                            <input asp-for="InsuranceNumber" class="form-control" placeholder="Insurance number" id="patient-insurance" />
+                            <span asp-validation-for="InsuranceNumber" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Phone" class="form-label fw-semibold"></label>
+                            <input asp-for="Phone" class="form-control" placeholder="Phone number" id="patient-phone" />
+                            <span asp-validation-for="Phone" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold"></label>
+                            <input asp-for="Email" class="form-control" placeholder="Email address" id="patient-email" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Address" class="form-label fw-semibold"></label>
+                        <textarea asp-for="Address" class="form-control" placeholder="Street, city, postal code" rows="2" id="patient-address"></textarea>
+                        <span asp-validation-for="Address" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4" id="patient-create-submit">
+                            Register Patient
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
