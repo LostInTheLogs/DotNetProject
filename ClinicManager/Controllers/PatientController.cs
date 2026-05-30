@@ -10,7 +10,7 @@ namespace ClinicManager.Controllers;
 public class PatientController(
     IPatientService patientService,
     IMedicalRecordService recordService,
-    ApplicationDbContext context, 
+    ApplicationDbContext context,
     ILogger<PatientController> logger) : Controller
 {
     // GET: /Patient
@@ -31,7 +31,7 @@ public class PatientController(
         ViewBag.MedicalRecords = await recordService.GetByPatientIdAsync(id);
         return View(patient);
     }
-    
+
     // PATCH/POST: /Patient/UpdateRecordDescription (AJAX Endpoint for Editing Inline)
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -180,6 +180,6 @@ public class PatientController(
             TempData["Error"] = "Failed to remove the requested file asset.";
         }
 
-        return RedirectToAction(nameof(Details), new {id = patientId });
+        return RedirectToAction(nameof(Details), new { id = patientId });
     }
 }

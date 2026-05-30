@@ -13,13 +13,13 @@ public class MedicalRecordService : IMedicalRecordService
     private readonly ApplicationDbContext _context;
     private readonly ClinicMapper _mapper;
     private readonly IWebHostEnvironment _environment;
-    
+
     private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
     private static readonly string[] AllowedExtensions = { ".pdf", ".jpg", ".jpeg", ".png" };
 
     public MedicalRecordService(
-        ApplicationDbContext context, 
-        ClinicMapper mapper, 
+        ApplicationDbContext context,
+        ClinicMapper mapper,
         IWebHostEnvironment environment)
     {
         _context = context;
