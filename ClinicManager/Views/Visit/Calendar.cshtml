@@ -1,0 +1,186 @@
+@model ClinicManager.ViewModels.DoctorScheduleViewModel
+@using ClinicManager.Models
+@{
+    ViewData["Title"] = "Appointment Board";
+    var currentUrl = Context.Request.Path + Context.Request.QueryString;
+}
+
+<div class="container-fluid py-3">
+    <div class="row mb-4 bg-white p-3 rounded shadow-sm align-items-center">
+        <div class="col-md-4">
+            <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-calendar3 text-primary me-2"></i>Schedule Dashboard</h4>
+        </div>
+        <div class="col-md-8">
+            <form method="get" asp-action="Calendar" class="row g-2 justify-content-md-end">
+                <div class="col-md-5">
+                    <select name="doctorId" class="form-select form-select-sm" onchange="this.form.submit()">
+                        @foreach (var doc in Model.Doctors)
+                        {
+                            <!option value="@doc.Id" @(doc.Id == Model.SelectedDoctorId ? "selected" : "")>Dr. @doc.FirstName @doc.LastName</!option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="date" name="date" class="form-control form-control-sm" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" onchange="this.form.submit()" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success shadow-sm d-flex align-items-center"><i class="bi bi-check-circle-fill me-2 fs-5"></i>@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger shadow-sm d-flex align-items-center"><i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>@TempData["Error"]</div>
+    }
+
+    <div class="row g-4">
+        <div class="col-xl-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-white py-3 fw-semibold">
+                    <i class="bi bi-patch-plus me-2"></i>Book Appointment Slot
+                </div>
+                <div class="card-body p-3">
+                    @if (!Model.AvailableSlots.Any())
+                    {
+                        <div class="alert alert-warning small m-0">No open consultation slots remain for this doctor on the selected date.</div>
+                    }
+                    else
+                    {
+                        <form asp-action="Book" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="DoctorId" value="@Model.SelectedDoctorId" />
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Select Chart Patient</label>
+                                <select name="PatientId" class="form-select form-select-sm" required>
+                                    <option value="">-- Choose Patient --</option>
+                                    @foreach (var pat in Model.Patients)
+                                    {
+                                        <option value="@pat.Id">@pat.LastName, @pat.FirstName (PESEL: @pat.Pesel)</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Available Consultation Times</label>
+                                <select name="ScheduledDate" class="form-select form-select-sm" required>
+                                    <option value="">-- Choose Available Slot Time --</option>
+                                    @foreach (var slot in Model.AvailableSlots)
+                                    {
+                                        <option value="@slot.ToString("yyyy-MM-dd HH:mm")">@slot.ToString("HH:mm")</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Reason for Visit / Symptoms</label>
+                                <textarea name="Reason" class="form-control form-control-sm" rows="3" placeholder="Enter routine primary complaints or medical checkup symptoms..." maxlength="500" required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-sm btn-primary w-100 py-2 fw-semibold">Confirm Booked Allocation</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light fw-bold text-secondary py-3">
+                    <i class="bi bi-clock-history me-2"></i>Daily Schedule Timeline — @Model.SelectedDate.ToString("MMMM dd, yyyy")
+                </div>
+                <div class="card-body p-0">
+                    @if (!Model.BookedVisits.Any())
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-x display-4 d-block mb-2"></i>No appointments scheduled for this date.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 text-sm small">
+                                <thead class="table-light text-muted fw-semibold">
+                                    <tr>
+                                        <th class="ps-3">Time Slot</th>
+                                        <th>Patient Profile</th>
+                                        <th>Status Badge</th>
+                                        <th>Reason for Visit</th>
+                                        <th class="text-end pe-3">Workflow State Shift Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var visit in Model.BookedVisits)
+                                    {
+                                        string statusContextClass = visit.Status switch
+                                        {
+                                            VisitStatus.Scheduled => "bg-primary",
+                                            VisitStatus.InProgress => "bg-warning text-dark",
+                                            VisitStatus.Completed => "bg-success",
+                                            VisitStatus.Cancelled => "bg-danger",
+                                            _ => "bg-secondary"
+                                        };
+
+                                        <tr class="@(visit.Status == VisitStatus.Cancelled ? "opacity-50 text-decoration-line-through bg-light-subtle" : "")">
+                                            <td class="ps-3 fw-bold text-dark text-nowrap">
+                                                <i class="bi bi-clock text-muted me-1"></i>@visit.ScheduledDate.ToString("HH:mm")
+                                            </td>
+                                            <td class="fw-semibold text-primary">@visit.PatientFullName</td>
+                                            <td><span class="badge @statusContextClass">@visit.Status</span></td>
+                                            <td class="text-muted text-wrap" style="max-width: 220px;">@visit.Reason</td>
+                                            <td class="text-end pe-3">
+                                                <div class="d-inline-flex gap-1">
+                                                    @if (visit.Status == VisitStatus.Scheduled)
+                                                    {
+                                                        <form asp-action="UpdateStatus" method="post" class="m-0">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="id" value="@visit.Id" />
+                                                            <input type="hidden" name="newStatus" value="@VisitStatus.InProgress" />
+                                                            <input type="hidden" name="returnUrl" value="@currentUrl" />
+                                                            <button type="submit" class="btn btn-xs btn-warning text-dark fw-bold"><i class="bi bi-play-fill fs-6"></i> Start</button>
+                                                        </form>
+                                                    }
+                                                    @if (visit.Status == VisitStatus.InProgress)
+                                                    {
+                                                        <form asp-action="UpdateStatus" method="post" class="m-0">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="id" value="@visit.Id" />
+                                                            <input type="hidden" name="newStatus" value="@VisitStatus.Completed" />
+                                                            <input type="hidden" name="returnUrl" value="@currentUrl" />
+                                                            <button type="submit" class="btn btn-xs btn-success fw-bold"><i class="bi bi-check-circle-fill fs-6"></i> Complete</button>
+                                                        </form>
+                                                    }
+                                                    @if (visit.Status == VisitStatus.Scheduled || visit.Status == VisitStatus.InProgress)
+                                                    {
+                                                        <form asp-action="UpdateStatus" method="post" class="m-0" onsubmit="return confirm('Cancel appointment?');">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="id" value="@visit.Id" />
+                                                            <input type="hidden" name="newStatus" value="@VisitStatus.Cancelled" />
+                                                            <input type="hidden" name="returnUrl" value="@currentUrl" />
+                                                            <button type="submit" class="btn btn-xs btn-outline-danger"><i class="bi bi-x-circle-fill fs-6"></i> Cancel</button>
+                                                        </form>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted text-xs small py-1 px-2 bg-light rounded"><i class="bi bi-lock-fill"></i> Closed</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-xs { padding: 0.15rem 0.35rem; font-size: 0.72rem; border-radius: 0.2rem; }
+</style>

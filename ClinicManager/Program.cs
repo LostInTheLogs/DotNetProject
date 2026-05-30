@@ -38,6 +38,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<ClinicMapper>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
+builder.Services.AddScoped<IVisitService, VisitService>();
 
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();

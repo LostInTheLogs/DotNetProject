@@ -33,6 +33,11 @@
                                     Patients
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Visit" asp-action="Calendar" id="nav-patients">
+                                    Visits
+                                </a>
+                            </li>
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">

@@ -11,7 +11,7 @@ public class Visit
 
     [Required]
     public string DoctorId { get; set; } = string.Empty;
-    public ApplicationUser? Doctor { get; set; } // Points to your extended Identity user model
+    public ApplicationUser? Doctor { get; set; }
 
     public DateTime ScheduledDate { get; set; }
     public VisitStatus Status { get; set; } = VisitStatus.Scheduled;
