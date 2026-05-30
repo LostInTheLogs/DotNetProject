@@ -39,6 +39,7 @@ builder.Services.AddSingleton<ClinicMapper>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
 builder.Services.AddScoped<IVisitService, VisitService>();
+builder.Services.AddScoped<IMedicationService, MedicationService>();
 
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();
