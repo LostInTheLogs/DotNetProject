@@ -10,6 +10,9 @@
         <h1 class="h3 fw-bold mb-0">👥 User Management</h1>
         <p class="text-muted small mb-0">Admin panel – list of accounts and assigned roles</p>
     </div>
+    <a asp-action="CreateStaff" class="btn btn-primary" id="create-staff-btn">
+        + Create Staff
+    </a>
 </div>
 
 @if (TempData["Success"] != null)
@@ -18,6 +21,42 @@
         ✅ @TempData["Success"]
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+}
+
+@if (TempData["StaffCreated"] != null)
+{
+    <div class="alert alert-info alert-dismissible fade show border-start border-4 border-info" role="alert">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <strong class="fs-6">✅ Staff account created successfully!</strong>
+                <p class="mb-1 small mt-1">
+                    <span class="fw-semibold">@TempData["StaffFullName"]</span>
+                    (@TempData["StaffEmail"]) &middot;
+                    <span class="badge bg-@(TempData["StaffRole"] switch { "Admin" => "danger", "Doctor" => "primary", _ => "success" })">@TempData["StaffRole"]</span>
+                </p>
+                <div class="mt-2 p-2 bg-light rounded d-flex align-items-center gap-2">
+                    <code class="fs-5 fw-bold user-select-all" id="generated-password">@TempData["StaffPassword"]</code>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyPassword()" id="copy-password-btn" title="Copy password">
+                        📋 Copy
+                    </button>
+                </div>
+                <p class="text-muted small mt-1 mb-0">⚠️ This password will only be shown once. Copy it now and share it with the new staff member.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    <script>
+        function copyPassword() {
+            var password = document.getElementById('generated-password');
+            var btn = document.getElementById('copy-password-btn');
+            if (password) {
+                navigator.clipboard.writeText(password.textContent).then(function() {
+                    btn.textContent = '✅ Copied!';
+                    setTimeout(function() { btn.textContent = '📋 Copy'; }, 2500);
+                });
+            }
+        }
+    </script>
 }
 
 <div class="card border-0 shadow-sm">
