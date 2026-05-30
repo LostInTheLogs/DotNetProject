@@ -10,7 +10,6 @@ public class VisitService(ApplicationDbContext context, ClinicMapper mapper) : I
 {
     public async Task<VisitResponseDto> CreateVisitAsync(CreateVisitRequestDto dto)
     {
-        // 🛡️ Business Guard Rule: Enforce 30-minute block boundaries
         var slotStart = dto.ScheduledDate;
         var slotEnd = dto.ScheduledDate.AddMinutes(30);
 

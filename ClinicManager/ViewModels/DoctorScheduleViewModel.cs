@@ -1,5 +1,5 @@
 using ClinicManager.DTOs;
-using ClinicManager.Models; // Points directly to your ApplicationUser model
+using ClinicManager.Models;
 
 namespace ClinicManager.ViewModels;
 
