@@ -47,3 +47,20 @@ public record AddPrescribedMedicationDto(
     [Required][MaxLength(200)] string Dosage,
     [Required][Range(1, 100)] int Quantity
 );
+
+public record ClinicalNoteResponseDto
+{
+    public int Id { get; init; }
+    public int VisitId { get; init; }
+    public string AuthorId { get; init; } = string.Empty;
+    public string AuthorName { get; init; } = string.Empty;
+    public string NoteType { get; init; } = string.Empty;
+    public string Content { get; init; } = string.Empty;
+    public DateTime CreatedAt { get; init; }
+}
+
+public record CreateClinicalNoteDto(
+    [Required] int VisitId,
+    [Required][MaxLength(100)] string NoteType,
+    [Required][MaxLength(4000)] string Content
+);
