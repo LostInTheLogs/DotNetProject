@@ -40,6 +40,7 @@ builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
 builder.Services.AddScoped<IVisitService, VisitService>();
 builder.Services.AddScoped<IMedicationService, MedicationService>();
+builder.Services.AddScoped<IClinicalNoteService, ClinicalNoteService>();
 
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();

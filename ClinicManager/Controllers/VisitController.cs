@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace ClinicManager.Controllers;
 
 [Authorize(Roles = "Admin,Doctor,Receptionist")]
-public class VisitController(IVisitService visitService, UserManager<ApplicationUser> userManager, IPatientService patientService, IMedicationService medicationService) : Controller
+public class VisitController(IVisitService visitService, UserManager<ApplicationUser> userManager, IPatientService patientService, IMedicationService medicationService, IClinicalNoteService clinicalNoteService) : Controller
 {
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -81,6 +81,7 @@ public class VisitController(IVisitService visitService, UserManager<Application
 
         var procedures = await visitService.GetAllProceduresAsync();
         var medications = await medicationService.GetAllAsync();
+        var notes = await clinicalNoteService.GetByVisitAsync(id);
 
         var viewModel = new VisitManageViewModel
         {
@@ -91,7 +92,8 @@ public class VisitController(IVisitService visitService, UserManager<Application
                 Id = m.Id,
                 Name = m.Name,
                 UnitPrice = m.UnitPrice
-            }).ToList()
+            }).ToList(),
+            ClinicalNotes = notes.ToList()
         };
 
         return View(viewModel);
@@ -160,6 +162,45 @@ public class VisitController(IVisitService visitService, UserManager<Application
         {
             await visitService.RemovePrescriptionAsync(prescriptionId);
             TempData["Success"] = "Prescription removed from visit.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Manage), new { id = visitId });
+    }
+
+    // POST: /Visit/AddNote
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddNote(CreateClinicalNoteDto dto)
+    {
+        try
+        {
+            var userId = userManager.GetUserId(User);
+            if (userId == null) return Unauthorized();
+
+            await clinicalNoteService.CreateAsync(dto, userId);
+            TempData["Success"] = "Clinical note added.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Manage), new { id = dto.VisitId });
+    }
+
+    // POST: /Visit/DeleteNote
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteNote(int noteId, int visitId)
+    {
+        try
+        {
+            await clinicalNoteService.DeleteAsync(noteId);
+            TempData["Success"] = "Clinical note deleted.";
         }
         catch (Exception ex)
         {

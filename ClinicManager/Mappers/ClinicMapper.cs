@@ -109,6 +109,11 @@ public partial class ClinicMapper
     [MapperIgnoreSource(nameof(MedicalRecord.Patient))]
     public partial MedicalRecordResponseDto RecordToResponseDto(MedicalRecord record);
 
+    [MapProperty(nameof(ClinicalNote.Author), nameof(ClinicalNoteResponseDto.AuthorName))]
+    [MapperIgnoreSource(nameof(ClinicalNote.Visit))]
+    [MapperIgnoreSource(nameof(ClinicalNote.AuthorId))]
+    public partial ClinicalNoteResponseDto NoteToResponseDto(ClinicalNote note);
+
     // ==========================================
     // PROPERTY RESOLVERS
     // ==========================================
@@ -118,4 +123,7 @@ public partial class ClinicMapper
 
     private string MapApplicationUserToDoctorFullName(ApplicationUser doctor) =>
         $"{doctor.FirstName} {doctor.LastName}";
+
+    private string MapApplicationUserToAuthorName(ApplicationUser author) =>
+        $"{author.FirstName} {author.LastName}";
 }
