@@ -89,4 +89,134 @@ public class VisitService(ApplicationDbContext context, ClinicMapper mapper) : I
 
         return mapper.VisitToResponseDto(visit);
     }
+
+    public async Task<VisitDetailsDto?> GetVisitDetailsAsync(int visitId)
+    {
+        var visit = await context.Visits
+            .Include(v => v.Patient)
+            .Include(v => v.Doctor)
+            .Include(v => v.ProceduresPerformed)
+                .ThenInclude(p => p.MedicalProcedure)
+            .Include(v => v.Prescriptions)
+                .ThenInclude(p => p.Medication)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(v => v.Id == visitId);
+
+        if (visit == null) return null;
+
+        return new VisitDetailsDto
+        {
+            Id = visit.Id,
+            PatientId = visit.PatientId,
+            PatientFullName = $"{visit.Patient!.FirstName} {visit.Patient.LastName}",
+            DoctorId = visit.DoctorId,
+            DoctorFullName = $"{visit.Doctor!.FirstName} {visit.Doctor.LastName}",
+            ScheduledDate = visit.ScheduledDate,
+            Status = visit.Status,
+            Reason = visit.Reason,
+            TotalCost = visit.TotalCost,
+            Procedures = visit.ProceduresPerformed.Select(mapper.ProcedureToResponseDto).ToList(),
+            Prescriptions = visit.Prescriptions.Select(mapper.MedicationToResponseDto).ToList()
+        };
+    }
+
+    public async Task<ProcedurePerformedResponseDto> AddProcedureAsync(int visitId, LogProcedurePerformedDto dto)
+    {
+        var visit = await context.Visits.FindAsync(visitId);
+        if (visit == null)
+            throw new KeyNotFoundException("Visit not found.");
+
+        var procedure = await context.MedicalProcedures.FindAsync(dto.MedicalProcedureId);
+        if (procedure == null)
+            throw new KeyNotFoundException("Medical procedure not found.");
+
+        var performed = mapper.LogDtoToProcedure(dto);
+        performed.VisitId = visitId;
+        performed.Notes ??= string.Empty;
+        performed.ActualCost = procedure.ServiceCost;
+
+        context.ProceduresPerformed.Add(performed);
+        await context.SaveChangesAsync();
+
+        await RecalculateTotalCostAsync(visitId);
+
+        await context.Entry(performed).Reference(p => p.MedicalProcedure).LoadAsync();
+        return mapper.ProcedureToResponseDto(performed);
+    }
+
+    public async Task RemoveProcedureAsync(int procedureId)
+    {
+        var performed = await context.ProceduresPerformed
+            .Include(p => p.PrescribedMedications)
+            .FirstOrDefaultAsync(p => p.Id == procedureId);
+
+        if (performed == null)
+            throw new KeyNotFoundException("Procedure record not found.");
+
+        var visitId = performed.VisitId;
+        context.ProceduresPerformed.Remove(performed);
+        await context.SaveChangesAsync();
+
+        await RecalculateTotalCostAsync(visitId);
+    }
+
+    public async Task<PrescribedMedicationResponseDto> AddPrescriptionAsync(int visitId, AddPrescribedMedicationDto dto)
+    {
+        var visit = await context.Visits.FindAsync(visitId);
+        if (visit == null)
+            throw new KeyNotFoundException("Visit not found.");
+
+        var medication = await context.Medications.FindAsync(dto.MedicationId);
+        if (medication == null)
+            throw new KeyNotFoundException("Medication not found.");
+
+        var prescribed = mapper.AddDtoToMedication(dto);
+        prescribed.VisitId = visitId;
+        prescribed.TotalCost = medication.UnitPrice * dto.Quantity;
+
+        context.PrescribedMedications.Add(prescribed);
+        await context.SaveChangesAsync();
+
+        await RecalculateTotalCostAsync(visitId);
+
+        await context.Entry(prescribed).Reference(p => p.Medication).LoadAsync();
+        return mapper.MedicationToResponseDto(prescribed);
+    }
+
+    public async Task RemovePrescriptionAsync(int prescriptionId)
+    {
+        var prescribed = await context.PrescribedMedications.FindAsync(prescriptionId);
+        if (prescribed == null)
+            throw new KeyNotFoundException("Prescription not found.");
+
+        var visitId = prescribed.VisitId;
+        context.PrescribedMedications.Remove(prescribed);
+        await context.SaveChangesAsync();
+
+        await RecalculateTotalCostAsync(visitId);
+    }
+
+    public async Task<IEnumerable<MedicalProcedureDto>> GetAllProceduresAsync()
+    {
+        return await context.MedicalProcedures
+            .AsNoTracking()
+            .OrderBy(p => p.Name)
+            .Select(p => mapper.ProcedureToCatalogDto(p))
+            .ToListAsync();
+    }
+
+    private async Task RecalculateTotalCostAsync(int visitId)
+    {
+        var visit = await context.Visits
+            .Include(v => v.ProceduresPerformed)
+            .Include(v => v.Prescriptions)
+            .FirstOrDefaultAsync(v => v.Id == visitId);
+
+        if (visit == null) return;
+
+        visit.TotalCost = visit.ProceduresPerformed.Sum(p => p.ActualCost)
+                          + visit.Prescriptions.Sum(p => p.TotalCost);
+
+        await context.SaveChangesAsync();
+    }
 }

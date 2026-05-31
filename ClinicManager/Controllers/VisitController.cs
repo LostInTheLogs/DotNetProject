@@ -4,10 +4,12 @@ using ClinicManager.Models;
 using ClinicManager.DTOs;
 using ClinicManager.ViewModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ClinicManager.Controllers;
 
-public class VisitController(IVisitService visitService, UserManager<ApplicationUser> userManager, IPatientService patientService) : Controller
+[Authorize(Roles = "Admin,Doctor,Receptionist")]
+public class VisitController(IVisitService visitService, UserManager<ApplicationUser> userManager, IPatientService patientService, IMedicationService medicationService) : Controller
 {
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -70,6 +72,103 @@ public class VisitController(IVisitService visitService, UserManager<Application
     }
 
     // POST: /Visit/Book
+    // GET: /Visit/Manage/{id}
+    [HttpGet]
+    public async Task<IActionResult> Manage(int id)
+    {
+        var visit = await visitService.GetVisitDetailsAsync(id);
+        if (visit == null) return NotFound();
+
+        var procedures = await visitService.GetAllProceduresAsync();
+        var medications = await medicationService.GetAllAsync();
+
+        var viewModel = new VisitManageViewModel
+        {
+            Visit = visit,
+            AvailableProcedures = procedures.ToList(),
+            AvailableMedications = medications.Select(m => new MedicationDto
+            {
+                Id = m.Id,
+                Name = m.Name,
+                UnitPrice = m.UnitPrice
+            }).ToList()
+        };
+
+        return View(viewModel);
+    }
+
+    // POST: /Visit/AddProcedure
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddProcedure(int visitId, LogProcedurePerformedDto dto)
+    {
+        try
+        {
+            await visitService.AddProcedureAsync(visitId, dto);
+            TempData["Success"] = "Procedure added to visit.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Manage), new { id = visitId });
+    }
+
+    // POST: /Visit/RemoveProcedure
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveProcedure(int procedureId, int visitId)
+    {
+        try
+        {
+            await visitService.RemoveProcedureAsync(procedureId);
+            TempData["Success"] = "Procedure removed from visit.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Manage), new { id = visitId });
+    }
+
+    // POST: /Visit/AddPrescription
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddPrescription(int visitId, AddPrescribedMedicationDto dto)
+    {
+        try
+        {
+            await visitService.AddPrescriptionAsync(visitId, dto);
+            TempData["Success"] = "Prescription added to visit.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Manage), new { id = visitId });
+    }
+
+    // POST: /Visit/RemovePrescription
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemovePrescription(int prescriptionId, int visitId)
+    {
+        try
+        {
+            await visitService.RemovePrescriptionAsync(prescriptionId);
+            TempData["Success"] = "Prescription removed from visit.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Manage), new { id = visitId });
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Book(int patientId, string doctorId, DateTime scheduledDate, string reason)

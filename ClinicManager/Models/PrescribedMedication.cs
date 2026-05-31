@@ -8,14 +8,17 @@ public class PrescribedMedication
     [Key]
     public int Id { get; set; }
 
-    // Tied directly to the visit context
     [Required]
     public int VisitId { get; set; }
 
     [ForeignKey(nameof(VisitId))]
     public virtual Visit Visit { get; set; } = null!;
 
-    // The catalog definition of what drug is being given
+    public int? ProcedurePerformedId { get; set; }
+
+    [ForeignKey(nameof(ProcedurePerformedId))]
+    public virtual ProcedurePerformed? ProcedurePerformed { get; set; }
+
     [Required]
     public int MedicationId { get; set; }
 

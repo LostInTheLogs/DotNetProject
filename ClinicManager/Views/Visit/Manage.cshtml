@@ -1,0 +1,250 @@
+@model ClinicManager.ViewModels.VisitManageViewModel
+@using ClinicManager.Models
+@using System.Globalization
+@{
+    ViewData["Title"] = "Manage Visit";
+    var currencyCulture = CultureInfo.GetCultureInfo("en-US");
+}
+
+<div class="container-fluid py-3">
+    <div class="row mb-4 bg-white p-3 rounded shadow-sm align-items-center">
+        <div class="col-md-8">
+            <a asp-action="Calendar" class="btn btn-sm btn-outline-secondary me-2">&larr; Back to Schedule</a>
+            <h4 class="fw-bold mb-0 d-inline-block mt-2">
+                <i class="bi bi-clipboard2-pulse text-primary me-2"></i>Manage Visit
+            </h4>
+        </div>
+        <div class="col-md-4 text-md-end mt-2 mt-md-0">
+            <span class="badge fs-6 @(Model.Visit.Status switch {
+                VisitStatus.Scheduled => "bg-primary",
+                VisitStatus.InProgress => "bg-warning text-dark",
+                VisitStatus.Completed => "bg-success",
+                VisitStatus.Cancelled => "bg-danger",
+                _ => "bg-secondary"
+            })">@Model.Visit.Status</span>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success shadow-sm d-flex align-items-center">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger shadow-sm d-flex align-items-center">@TempData["Error"]</div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-4 d-flex flex-column gap-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-white py-3 fw-semibold">
+                    <i class="bi bi-info-circle me-2"></i>Visit Summary
+                </div>
+                <div class="card-body p-3">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tr>
+                            <td class="text-muted small">Patient</td>
+                            <td class="fw-semibold">@Model.Visit.PatientFullName</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted small">Doctor</td>
+                            <td class="fw-semibold">@Model.Visit.DoctorFullName</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted small">Date &amp; Time</td>
+                            <td class="fw-semibold">@Model.Visit.ScheduledDate.ToString("MMM dd, yyyy HH:mm")</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted small">Reason</td>
+                            <td>@Model.Visit.Reason</td>
+                        </tr>
+                        <tr class="border-top">
+                            <td class="text-muted small fw-bold pt-2">Total Cost</td>
+                            <td class="fw-bold fs-5 text-primary pt-2" id="total-cost">@Model.Visit.TotalCost.ToString("C", currencyCulture)</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            @if (Model.Visit.Status == VisitStatus.InProgress)
+            {
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-dark text-white py-3 fw-semibold">
+                        <i class="bi bi-plus-circle me-2"></i>Add Procedure
+                    </div>
+                    <div class="card-body p-3">
+                        <form asp-action="AddProcedure" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="visitId" value="@Model.Visit.Id" />
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Procedure</label>
+                                <select name="MedicalProcedureId" class="form-select form-select-sm" required>
+                                    <option value="">-- Select Procedure --</option>
+                                    @foreach (var proc in Model.AvailableProcedures)
+                                    {
+                                        <option value="@proc.Id">@proc.Name (@proc.ServiceCost.ToString("C", currencyCulture))</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Notes</label>
+                                <textarea name="Notes" class="form-control form-control-sm" rows="2" maxlength="500"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-sm btn-primary w-100 py-2 fw-semibold">
+                                <i class="bi bi-plus-lg"></i> Add Procedure
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-dark text-white py-3 fw-semibold">
+                        <i class="bi bi-capsule me-2"></i>Prescribe Medication
+                    </div>
+                    <div class="card-body p-3">
+                        <form asp-action="AddPrescription" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="visitId" value="@Model.Visit.Id" />
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Medication</label>
+                                <select name="MedicationId" class="form-select form-select-sm" required>
+                                    <option value="">-- Select Medication --</option>
+                                    @foreach (var med in Model.AvailableMedications)
+                                    {
+                                        <option value="@med.Id">@med.Name (@med.UnitPrice.ToString("C", currencyCulture) ea)</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Dosage</label>
+                                <input name="Dosage" class="form-control form-control-sm" placeholder="e.g. 1 tablet 3x a day" maxlength="200" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Quantity</label>
+                                <input name="Quantity" type="number" class="form-control form-control-sm" min="1" max="100" value="1" required />
+                            </div>
+
+                            <button type="submit" class="btn btn-sm btn-primary w-100 py-2 fw-semibold">
+                                <i class="bi bi-plus-lg"></i> Add Prescription
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light fw-bold text-secondary py-3">
+                    <i class="bi bi-list-check me-2"></i>Procedures Performed
+                    <span class="badge bg-secondary float-end">@Model.Visit.Procedures.Count</span>
+                </div>
+                <div class="card-body p-0">
+                    @if (!Model.Visit.Procedures.Any())
+                    {
+                        <div class="text-center py-4 text-muted small">No procedures recorded yet.</div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 small">
+                                <thead class="table-light text-muted">
+                                    <tr>
+                                        <th>Procedure</th>
+                                        <th>Cost</th>
+                                        <th>Notes</th>
+                                        @if (Model.Visit.Status == VisitStatus.InProgress)
+                                        {
+                                            <th class="text-end">Action</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var proc in Model.Visit.Procedures)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold">@proc.ProcedureName</td>
+                                            <td>@proc.ActualCost.ToString("C", currencyCulture)</td>
+                                            <td class="text-muted text-wrap" style="max-width: 300px;">@proc.Notes</td>
+                                            @if (Model.Visit.Status == VisitStatus.InProgress)
+                                            {
+                                                <td class="text-end">
+                                                    <form asp-action="RemoveProcedure" method="post" class="m-0" onsubmit="return confirm('Remove this procedure?');">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="procedureId" value="@proc.Id" />
+                                                        <input type="hidden" name="visitId" value="@Model.Visit.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                                    </form>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light fw-bold text-secondary py-3">
+                    <i class="bi bi-prescription2 me-2"></i>Prescribed Medications
+                    <span class="badge bg-secondary float-end">@Model.Visit.Prescriptions.Count</span>
+                </div>
+                <div class="card-body p-0">
+                    @if (!Model.Visit.Prescriptions.Any())
+                    {
+                        <div class="text-center py-4 text-muted small">No medications prescribed yet.</div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 small">
+                                <thead class="table-light text-muted">
+                                    <tr>
+                                        <th>Medication</th>
+                                        <th>Dosage</th>
+                                        <th>Qty</th>
+                                        <th>Cost</th>
+                                        @if (Model.Visit.Status == VisitStatus.InProgress)
+                                        {
+                                            <th class="text-end">Action</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var med in Model.Visit.Prescriptions)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold">@med.MedicationName</td>
+                                            <td>@med.Dosage</td>
+                                            <td>@med.Quantity</td>
+                                            <td>@med.TotalCost.ToString("C", currencyCulture)</td>
+                                            @if (Model.Visit.Status == VisitStatus.InProgress)
+                                            {
+                                                <td class="text-end">
+                                                    <form asp-action="RemovePrescription" method="post" class="m-0" onsubmit="return confirm('Remove this prescription?');">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="prescriptionId" value="@med.Id" />
+                                                        <input type="hidden" name="visitId" value="@Model.Visit.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                                    </form>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
