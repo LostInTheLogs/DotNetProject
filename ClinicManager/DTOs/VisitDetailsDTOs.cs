@@ -29,7 +29,7 @@ public record ProcedurePerformedResponseDto
 
 public record LogProcedurePerformedDto(
     [Required] int MedicalProcedureId,
-    [Required][MaxLength(500)] string Notes // Matches model property destination
+    [MaxLength(500)] string Notes = "" // Matches model property destination
 );
 
 public record PrescribedMedicationResponseDto

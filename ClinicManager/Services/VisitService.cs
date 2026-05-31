@@ -132,6 +132,7 @@ public class VisitService(ApplicationDbContext context, ClinicMapper mapper) : I
 
         var performed = mapper.LogDtoToProcedure(dto);
         performed.VisitId = visitId;
+        performed.Notes ??= string.Empty;
         performed.ActualCost = procedure.ServiceCost;
 
         context.ProceduresPerformed.Add(performed);
