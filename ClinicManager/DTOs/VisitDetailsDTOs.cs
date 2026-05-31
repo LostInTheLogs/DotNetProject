@@ -1,6 +1,22 @@
 using System.ComponentModel.DataAnnotations;
+using ClinicManager.Models;
 
 namespace ClinicManager.DTOs;
+
+public record VisitDetailsDto
+{
+    public int Id { get; init; }
+    public int PatientId { get; init; }
+    public string PatientFullName { get; init; } = string.Empty;
+    public string DoctorId { get; init; } = string.Empty;
+    public string DoctorFullName { get; init; } = string.Empty;
+    public DateTime ScheduledDate { get; init; }
+    public VisitStatus Status { get; init; }
+    public string Reason { get; init; } = string.Empty;
+    public decimal TotalCost { get; init; }
+    public List<ProcedurePerformedResponseDto> Procedures { get; init; } = new();
+    public List<PrescribedMedicationResponseDto> Prescriptions { get; init; } = new();
+}
 
 public record ProcedurePerformedResponseDto
 {

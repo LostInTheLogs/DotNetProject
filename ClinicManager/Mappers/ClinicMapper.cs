@@ -78,11 +78,15 @@ public partial class ClinicMapper
     [MapProperty("Medication.Name", nameof(PrescribedMedicationResponseDto.MedicationName))]
     [MapperIgnoreSource(nameof(PrescribedMedication.Visit))]
     [MapperIgnoreSource(nameof(PrescribedMedication.VisitId))]
+    [MapperIgnoreSource(nameof(PrescribedMedication.ProcedurePerformedId))]
+    [MapperIgnoreSource(nameof(PrescribedMedication.ProcedurePerformed))]
     public partial PrescribedMedicationResponseDto MedicationToResponseDto(PrescribedMedication med);
 
     [MapperIgnoreTarget(nameof(PrescribedMedication.Id))]
     [MapperIgnoreTarget(nameof(PrescribedMedication.VisitId))]
     [MapperIgnoreTarget(nameof(PrescribedMedication.Visit))]
+    [MapperIgnoreTarget(nameof(PrescribedMedication.ProcedurePerformedId))]
+    [MapperIgnoreTarget(nameof(PrescribedMedication.ProcedurePerformed))]
     [MapperIgnoreTarget(nameof(PrescribedMedication.Medication))]
     [MapperIgnoreTarget(nameof(PrescribedMedication.TotalCost))]
     public partial PrescribedMedication AddDtoToMedication(AddPrescribedMedicationDto dto);

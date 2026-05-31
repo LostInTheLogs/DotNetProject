@@ -145,6 +145,10 @@
                                                     }
                                                     @if (visit.Status == VisitStatus.InProgress)
                                                     {
+                                                        <a asp-action="Manage" asp-route-id="@visit.Id"
+                                                           class="btn btn-xs btn-info text-white fw-bold">
+                                                            <i class="bi bi-gear-fill fs-6"></i> Manage
+                                                        </a>
                                                         <form asp-action="UpdateStatus" method="post" class="m-0">
                                                             @Html.AntiForgeryToken()
                                                             <input type="hidden" name="id" value="@visit.Id" />
