@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ClinicManager.DTOs;
 
 public record MedicationDto
@@ -13,3 +15,5 @@ public record MedicalProcedureDto
     public string Name { get; init; } = string.Empty;
     public decimal ServiceCost { get; init; } // Matches Model
 }
+
+

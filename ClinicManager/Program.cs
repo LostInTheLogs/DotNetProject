@@ -45,6 +45,7 @@ builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
 builder.Services.AddScoped<IVisitService, VisitService>();
 builder.Services.AddScoped<IMedicationService, MedicationService>();
+builder.Services.AddScoped<IMedicalProcedureService, MedicalProcedureService>();
 builder.Services.AddScoped<IClinicalNoteService, ClinicalNoteService>();
 builder.Services.AddScoped<IPdfService, PdfService>();
 

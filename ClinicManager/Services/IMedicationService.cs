@@ -7,7 +7,7 @@ public interface IMedicationService
 {
     Task<IEnumerable<Medication>> GetAllAsync(bool includeUnavailable = true);
     Task<Medication?> GetByIdAsync(int id);
-    Task CreateAsync(MedicationFormDto dto);
-    Task UpdateAsync(MedicationFormDto dto);
+    Task CreateAsync(Medication dto);
+    Task UpdateAsync(Medication dto);
     Task ToggleAvailabilityAsync(int id);
 }

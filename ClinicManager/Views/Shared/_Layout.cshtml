@@ -46,6 +46,12 @@
                                         Medications
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="MedicalProcedure" asp-action="Index"
+                                       id="nav-patients">
+                                        Procedures
+                                    </a>
+                                </li>
                             }
 
                             @if (User.IsInRole("Admin"))

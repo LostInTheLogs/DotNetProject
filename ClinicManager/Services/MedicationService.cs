@@ -22,7 +22,7 @@ public class MedicationService(ApplicationDbContext context) : IMedicationServic
         return await context.Medications.FindAsync(id);
     }
 
-    public async Task CreateAsync(MedicationFormDto dto)
+    public async Task CreateAsync(Medication dto)
     {
         var medication = new Medication
         {
@@ -36,7 +36,7 @@ public class MedicationService(ApplicationDbContext context) : IMedicationServic
         await context.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(MedicationFormDto dto)
+    public async Task UpdateAsync(Medication dto)
     {
         var medication = await context.Medications.FindAsync(dto.Id);
         if (medication == null) throw new KeyNotFoundException("Medication item not found.");
