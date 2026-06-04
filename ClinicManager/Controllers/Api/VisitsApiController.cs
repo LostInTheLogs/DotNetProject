@@ -81,8 +81,8 @@ public class VisitsApiController : ControllerBase
 
         var patients = await _context.Patients
             .AsNoTracking()
-            .Where(p => p.FirstName.ToLower().Contains(lowerQuery) || 
-                        p.LastName.ToLower().Contains(lowerQuery) || 
+            .Where(p => p.FirstName.ToLower().Contains(lowerQuery) ||
+                        p.LastName.ToLower().Contains(lowerQuery) ||
                         p.Pesel.Contains(lowerQuery))
             .Take(50)
             .Select(p => new

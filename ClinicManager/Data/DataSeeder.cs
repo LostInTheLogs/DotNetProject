@@ -90,9 +90,6 @@ public static class DataSeeder
         await context.SaveChangesAsync();
 
         // =========================================================================
-        // 🚀 5. BOGUS DYNAMIC DATA SEEDING ENGINE (FOR PERFORMANCE LOAD TESTING)
-        // =========================================================================
-        
         // Only run if the database lacks patients and active load profiles
         if (!await context.Patients.AnyAsync())
         {
@@ -119,13 +116,13 @@ public static class DataSeeder
 
             var generatedPatients = patientFaker.Generate(100);
             context.Patients.AddRange(generatedPatients);
-            
+
             // Persist patients so EF Core generates valid incremental primary Keys
             await context.SaveChangesAsync();
 
             // B. Generate Relational Mock Visits via Bogus Rules
-            var clinicalReasons = new[] 
-            { 
+            var clinicalReasons = new[]
+            {
                 "Routine chronic disease maintenance and follow-up consultation.",
                 "Patient presenting with persistent cardiovascular palpitations.",
                 "Acute abdominal pain review and diagnostic screening evaluation.",
@@ -145,7 +142,7 @@ public static class DataSeeder
 
             var generatedVisits = visitFaker.Generate(300);
             context.Visits.AddRange(generatedVisits);
-            
+
             await context.SaveChangesAsync();
         }
     }
