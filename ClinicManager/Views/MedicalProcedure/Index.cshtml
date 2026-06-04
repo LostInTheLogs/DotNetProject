@@ -1,0 +1,70 @@
+@model IEnumerable<ClinicManager.Models.MedicalProcedure>
+@{
+    ViewData["Title"] = "Medical Procedures";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-capsule text-primary me-2"></i>Procedures Catalog</h4>
+        <p class="text-muted small mb-0">Manage clinic procedures options and pricing</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary btn-sm fw-semibold">
+        <i class="bi bi-plus-lg me-1"></i> Add Procedure
+    </a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success shadow-sm d-flex align-items-center"><i class="bi bi-check-circle-fill me-2 fs-5"></i>@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger shadow-sm d-flex align-items-center"><i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>@TempData["Error"]</div>
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-clipboard2-x display-4 d-block mb-2"></i>No catalog entities tracked yet.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-sm small">
+                    <thead class="table-light text-muted fw-semibold">
+                        <tr>
+                            <th class="ps-3">Name</th>
+                            <th>Description</th>
+                            <th>Service Cost</th>
+                            <th class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var procedure in Model)
+                        {
+                            <tr>
+                                <td class="ps-3 fw-bold text-dark text-nowrap">@procedure.Name</td>
+                                <td class="text-muted text-wrap" style="max-width: 320px;">@procedure.Description</td>
+                                <td class="fw-semibold text-dark">$@procedure.ServiceCost.ToString("F2")</td>
+                                <td class="text-end pe-3">
+                                    <div class="d-inline-flex gap-1">
+                                        <a asp-action="Edit" asp-route-id="@procedure.Id" class="btn btn-xs btn-outline-primary">
+                                            <i class="bi bi-pencil-fill fs-6"></i> Edit
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .btn-xs { padding: 0.15rem 0.35rem; font-size: 0.72rem; border-radius: 0.2rem; }
+</style>

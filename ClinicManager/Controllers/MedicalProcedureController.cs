@@ -6,30 +6,30 @@ using ClinicManager.Models;
 namespace ClinicManager.Controllers;
 
 [Authorize(Roles = "Admin,Receptionist")]
-public class MedicationController(IMedicationService medicationService) : Controller
+public class MedicalProcedureController(IMedicalProcedureService procedureService) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var medications = await medicationService.GetAllAsync();
-        return View(medications);
+        var procedures = await procedureService.GetAllAsync();
+        return View(procedures);
     }
 
     [HttpGet]
     public IActionResult Create()
     {
-        return View(new Medication());
+        return View(new MedicalProcedure());
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Medication dto)
+    public async Task<IActionResult> Create(MedicalProcedure dto)
     {
         if (!ModelState.IsValid) return View(dto);
 
         try
         {
-            await medicationService.CreateAsync(dto);
+            await procedureService.CreateAsync(dto);
             TempData["Success"] = $"{dto.Name} successfully added to inventory catalog.";
             return RedirectToAction(nameof(Index));
         }
@@ -43,16 +43,15 @@ public class MedicationController(IMedicationService medicationService) : Contro
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
-        var med = await medicationService.GetByIdAsync(id);
+        var med = await procedureService.GetByIdAsync(id);
         if (med == null) return NotFound();
 
-        var dto = new Medication()
+        var dto = new MedicalProcedure()
         {
             Id = med.Id,
             Name = med.Name,
             Description = med.Description,
-            UnitPrice = med.UnitPrice,
-            IsAvailable = med.IsAvailable
+            ServiceCost = med.ServiceCost,
         };
 
         return View(dto);
@@ -60,14 +59,14 @@ public class MedicationController(IMedicationService medicationService) : Contro
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Medication dto)
+    public async Task<IActionResult> Edit(MedicalProcedure dto)
     {
         if (!ModelState.IsValid) return View(dto);
 
         try
         {
-            await medicationService.UpdateAsync(dto);
-            TempData["Success"] = "Medication entry updated successfully.";
+            await procedureService.UpdateAsync(dto);
+            TempData["Success"] = "Procedure entry updated successfully.";
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
@@ -75,21 +74,5 @@ public class MedicationController(IMedicationService medicationService) : Contro
             ModelState.AddModelError(string.Empty, ex.Message);
             return View(dto);
         }
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ToggleStatus(int id)
-    {
-        try
-        {
-            await medicationService.ToggleAvailabilityAsync(id);
-            TempData["Success"] = "Medication availability status changed.";
-        }
-        catch (Exception ex)
-        {
-            TempData["Error"] = ex.Message;
-        }
-        return RedirectToAction(nameof(Index));
     }
 }

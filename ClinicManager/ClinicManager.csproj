@@ -30,4 +30,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.2.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AdditionalFiles Include="Views\MedicalProcedure\Create.cshtml" />
+    <AdditionalFiles Include="Views\MedicalProcedure\Edit.cshtml" />
+    <AdditionalFiles Include="Views\MedicalProcedure\Index.cshtml" />
+  </ItemGroup>
+
 </Project>
