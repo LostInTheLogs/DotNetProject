@@ -53,5 +53,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<Patient>().HasQueryFilter(p => !p.IsDeleted);
         modelBuilder.Entity<MedicalRecord>().HasQueryFilter(r => !r.Patient!.IsDeleted);
         modelBuilder.Entity<Visit>().HasQueryFilter(v => !v.Patient!.IsDeleted);
+        modelBuilder.Entity<ClinicalNote>().HasQueryFilter(n => !n.Visit.Patient!.IsDeleted);
+        modelBuilder.Entity<PrescribedMedication>().HasQueryFilter(n => !n.Visit.Patient!.IsDeleted);
+        modelBuilder.Entity<ProcedurePerformed>().HasQueryFilter(n => !n.Visit.Patient!.IsDeleted);
     }
 }

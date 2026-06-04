@@ -7,7 +7,7 @@ public class ClinicalNote
     public int Id { get; set; }
 
     public int VisitId { get; set; }
-    public Visit? Visit { get; set; }
+    public Visit Visit { get; set; }
 
     [Required]
     public string AuthorId { get; set; } = string.Empty;
@@ -15,7 +15,7 @@ public class ClinicalNote
 
     [Required]
     [MaxLength(100)]
-    public string NoteType { get; set; } = string.Empty; // e.g., "Wywiad", "Rozpoznanie", "Zalecenia"
+    public string NoteType { get; set; } = string.Empty;
 
     [Required]
     [MaxLength(4000)]
