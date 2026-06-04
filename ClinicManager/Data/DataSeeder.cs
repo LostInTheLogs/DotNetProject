@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Bogus;
 using ClinicManager.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -85,6 +86,64 @@ public static class DataSeeder
             );
         }
 
+        // Save catalog structures first to make sure everything below runs on valid baseline entities
         await context.SaveChangesAsync();
+
+        // =========================================================================
+        // Only run if the database lacks patients and active load profiles
+        if (!await context.Patients.AnyAsync())
+        {
+            // Deterministic random seed so data remains completely consistent on identical builds
+            Randomizer.Seed = new Random(2026);
+
+            // Fetch doctor IDs mapped through Identity Roles
+            var doctorsInSystem = await userManager.GetUsersInRoleAsync("Doctor");
+            var doctorIds = doctorsInSystem.Select(d => d.Id).ToList();
+
+            if (!doctorIds.Any())
+            {
+                // Fallback catch boundary in case role resolution context is delayed at startup
+                var defaultDoc = await userManager.FindByEmailAsync("dr.kowalski@clinic.com");
+                if (defaultDoc != null) doctorIds.Add(defaultDoc.Id);
+            }
+
+            // A. Generate Mock Patients via Bogus Rules
+            var patientFaker = new Faker<Patient>()
+                .RuleFor(p => p.FirstName, f => f.Name.FirstName())
+                .RuleFor(p => p.LastName, f => f.Name.LastName())
+                .RuleFor(p => p.Email, f => f.Internet.Email())
+                .RuleFor(p => p.Pesel, f => f.Random.ReplaceNumbers("###########"));
+
+            var generatedPatients = patientFaker.Generate(100);
+            context.Patients.AddRange(generatedPatients);
+
+            // Persist patients so EF Core generates valid incremental primary Keys
+            await context.SaveChangesAsync();
+
+            // B. Generate Relational Mock Visits via Bogus Rules
+            var clinicalReasons = new[]
+            {
+                "Routine chronic disease maintenance and follow-up consultation.",
+                "Patient presenting with persistent cardiovascular palpitations.",
+                "Acute abdominal pain review and diagnostic screening evaluation.",
+                "Prescription extension and minor therapeutic symptoms overview."
+            };
+
+            var appointmentStatuses = new[] { VisitStatus.Scheduled, VisitStatus.InProgress };
+
+            var visitFaker = new Faker<Visit>()
+                .RuleFor(v => v.PatientId, f => f.PickRandom(generatedPatients).Id)
+                .RuleFor(v => v.DoctorId, f => f.PickRandom(doctorIds))
+                .RuleFor(v => v.ScheduledDate, f => f.Date.Between(DateTime.Now.AddDays(-2), DateTime.Now.AddDays(12)))
+                .RuleFor(v => v.Status, f => f.PickRandom(appointmentStatuses))
+                .RuleFor(v => v.Reason, f => f.PickRandom(clinicalReasons))
+                .RuleFor(v => v.TotalCost, f => f.Finance.Amount(100, 350, 2))
+                .RuleFor(v => v.CreatedAt, f => DateTime.UtcNow);
+
+            var generatedVisits = visitFaker.Generate(300);
+            context.Visits.AddRange(generatedVisits);
+
+            await context.SaveChangesAsync();
+        }
     }
 }
