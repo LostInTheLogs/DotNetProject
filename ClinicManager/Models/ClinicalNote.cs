@@ -15,7 +15,7 @@ public class ClinicalNote
 
     [Required]
     [MaxLength(100)]
-    public string NoteType { get; set; } = string.Empty; // e.g., "Wywiad", "Rozpoznanie", "Zalecenia"
+    public string NoteType { get; set; } = string.Empty;
 
     [Required]
     [MaxLength(4000)]
