@@ -15,13 +15,28 @@
             </h4>
         </div>
         <div class="col-md-4 text-md-end mt-2 mt-md-0">
-            <span class="badge fs-6 @(Model.Visit.Status switch {
-                VisitStatus.Scheduled => "bg-primary",
-                VisitStatus.InProgress => "bg-warning text-dark",
-                VisitStatus.Completed => "bg-success",
-                VisitStatus.Cancelled => "bg-danger",
-                _ => "bg-secondary"
-            })">@Model.Visit.Status</span>
+            <div class="d-flex flex-wrap gap-2 justify-content-md-end align-items-center">
+                <span class="badge fs-6 @(Model.Visit.Status switch {
+                    VisitStatus.Scheduled => "bg-primary",
+                    VisitStatus.InProgress => "bg-warning text-dark",
+                    VisitStatus.Completed => "bg-success",
+                    VisitStatus.Cancelled => "bg-danger",
+                    _ => "bg-secondary"
+                })">@Model.Visit.Status</span>
+
+                @if (Model.Visit.Status == VisitStatus.Completed)
+                {
+                    <a asp-action="DownloadSummary" asp-route-id="@Model.Visit.Id" class="btn btn-sm btn-primary">
+                        <i class="bi bi-file-earmark-pdf me-1"></i>Download Summary
+                    </a>
+                    @if (Model.Visit.Prescriptions.Any())
+                    {
+                        <a asp-action="DownloadPrescription" asp-route-id="@Model.Visit.Id" class="btn btn-sm btn-success">
+                            <i class="bi bi-prescription2 me-1"></i>Download Prescription
+                        </a>
+                    }
+                }
+            </div>
         </div>
     </div>
 

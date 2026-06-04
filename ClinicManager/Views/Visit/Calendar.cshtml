@@ -157,6 +157,13 @@
                                                             <button type="submit" class="btn btn-xs btn-success fw-bold"><i class="bi bi-check-circle-fill fs-6"></i> Complete</button>
                                                         </form>
                                                     }
+                                                    @if (visit.Status == VisitStatus.Completed)
+                                                    {
+                                                        <a asp-action="Manage" asp-route-id="@visit.Id"
+                                                           class="btn btn-xs btn-info text-white fw-bold">
+                                                            <i class="bi bi-eye-fill fs-6"></i> View Details
+                                                        </a>
+                                                    }
                                                     @if (visit.Status == VisitStatus.Scheduled || visit.Status == VisitStatus.InProgress)
                                                     {
                                                         <form asp-action="UpdateStatus" method="post" class="m-0" onsubmit="return confirm('Cancel appointment?');">
