@@ -7,7 +7,7 @@ public class ClinicalNote
     public int Id { get; set; }
 
     public int VisitId { get; set; }
-    public Visit? Visit { get; set; }
+    public Visit Visit { get; set; }
 
     [Required]
     public string AuthorId { get; set; } = string.Empty;
