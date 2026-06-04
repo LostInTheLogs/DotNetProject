@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace ClinicManager.Controllers;
 
 [Authorize(Roles = "Admin,Doctor,Receptionist")]
-public class VisitController(IVisitService visitService, UserManager<ApplicationUser> userManager, IPatientService patientService, IMedicationService medicationService, IClinicalNoteService clinicalNoteService) : Controller
+public class VisitController(IVisitService visitService, UserManager<ApplicationUser> userManager, IPatientService patientService, IMedicationService medicationService, IClinicalNoteService clinicalNoteService, IPdfService pdfService) : Controller
 {
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -232,5 +232,57 @@ public class VisitController(IVisitService visitService, UserManager<Application
         }
 
         return RedirectToAction(nameof(Calendar), new { doctorId = doctorId, date = scheduledDate.ToString("yyyy-MM-dd") });
+    }
+
+    // GET: /Visit/DownloadSummary/{id}
+    [HttpGet]
+    public async Task<IActionResult> DownloadSummary(int id)
+    {
+        var visit = await visitService.GetVisitDetailsAsync(id);
+        if (visit == null) return NotFound();
+
+        if (visit.Status != VisitStatus.Completed)
+        {
+            TempData["Error"] = "Visit summary PDF can only be generated for completed visits.";
+            return RedirectToAction(nameof(Manage), new { id = id });
+        }
+
+        var patient = await patientService.GetByIdAsync(visit.PatientId);
+        if (patient == null) return NotFound("Patient data not found.");
+
+        var notes = await clinicalNoteService.GetByVisitAsync(id);
+
+        var pdfBytes = pdfService.GenerateVisitSummaryPdf(visit, patient, notes);
+        var fileName = $"VisitSummary_{visit.Id}_{patient.LastName}.pdf";
+
+        return File(pdfBytes, "application/pdf", fileName);
+    }
+
+    // GET: /Visit/DownloadPrescription/{id}
+    [HttpGet]
+    public async Task<IActionResult> DownloadPrescription(int id)
+    {
+        var visit = await visitService.GetVisitDetailsAsync(id);
+        if (visit == null) return NotFound();
+
+        if (visit.Status != VisitStatus.Completed)
+        {
+            TempData["Error"] = "Prescriptions can only be printed for completed visits.";
+            return RedirectToAction(nameof(Manage), new { id = id });
+        }
+
+        if (!visit.Prescriptions.Any())
+        {
+            TempData["Error"] = "No prescriptions were recorded for this visit.";
+            return RedirectToAction(nameof(Manage), new { id = id });
+        }
+
+        var patient = await patientService.GetByIdAsync(visit.PatientId);
+        if (patient == null) return NotFound("Patient data not found.");
+
+        var pdfBytes = pdfService.GeneratePrescriptionPdf(visit, patient);
+        var fileName = $"Prescription_{visit.Id}_{patient.LastName}.pdf";
+
+        return File(pdfBytes, "application/pdf", fileName);
     }
 }

@@ -19,4 +19,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ClinicManager\ClinicManager.csproj" />
+  </ItemGroup>
+
 </Project>
