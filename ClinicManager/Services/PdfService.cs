@@ -486,4 +486,115 @@ public class PdfService : IPdfService
 
         return document;
     }
+
+    public byte[] GenerateUpcomingVisitsReportPdf(DateTime targetDate, IEnumerable<VisitDetailsDto> upcomingVisits)
+    {
+        var document = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(40);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontFamily("Arial").FontSize(10));
+
+                // Page Header
+                page.Header().Row(row =>
+                {
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Text("THE ABYSMAL MEDICAL CENTER").FontSize(18).Bold().FontColor(Color.FromHex("#0284C7"));
+                        col.Item().Text("Automated Daily Operations Management Report").FontSize(9).Italic().FontColor(Colors.Grey.Darken1);
+                    });
+
+                    row.ConstantItem(250).AlignRight().Column(col =>
+                    {
+                        col.Item().Text("UPCOMING VISITS").FontSize(16).Bold().FontColor(Color.FromHex("#0284C7")).AlignRight();
+                        col.Item().Text($"Schedule Date: {targetDate.ToString("yyyy-MM-dd")}").FontSize(10).Bold().AlignRight();
+                        col.Item().Text($"Run Date: {DateTime.Now:yyyy-MM-dd HH:mm}").FontSize(8).FontColor(Colors.Grey.Darken1).AlignRight();
+                    });
+                });
+
+                // Page Content
+                page.Content().PaddingVertical(15).Column(col =>
+                {
+                    col.Item().Height(1.5f).Background(Color.FromHex("#0284C7"));
+                    col.Item().PaddingBottom(15);
+
+                    if (upcomingVisits == null || !upcomingVisits.Any())
+                    {
+                        col.Item().Border(1).BorderColor(Colors.Grey.Lighten2).Background(Colors.Grey.Lighten5).Padding(20).AlignCenter().Column(c =>
+                        {
+                            c.Item().Text("No appointments scheduled for this date.").Italic().FontSize(11).FontColor(Colors.Grey.Darken2).AlignCenter();
+                        });
+                    }
+                    else
+                    {
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(45);  // Time
+                                columns.RelativeColumn(2.5f); // Patient
+                                columns.RelativeColumn(2.5f); // Doctor
+                                columns.RelativeColumn(4);    // Reason for Visit
+                            });
+
+                            // Table Header
+                            table.Header(header =>
+                            {
+                                void HCell(string text)
+                                {
+                                    header.Cell().Background(Color.FromHex("#0284C7")).Padding(6)
+                                        .Text(text).Bold().FontColor(Colors.White).FontSize(9);
+                                }
+
+                                HCell("Time");
+                                HCell("Patient");
+                                HCell("Assigned Provider");
+                                HCell("Reason Summary");
+                            });
+
+                            // Table Body Rows
+                            foreach (var visit in upcomingVisits.OrderBy(v => v.ScheduledDate))
+                            {
+                                // Alternating backgrounds for scannability
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(6)
+                                    .Text(visit.ScheduledDate.ToString("HH:mm")).Bold().FontColor(Color.FromHex("#0284C7"));
+
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(6)
+                                    .Text(visit.PatientFullName ?? "N/A").Bold();
+
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(6)
+                                    .Text($"Dr. {visit.DoctorFullName}");
+
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(6)
+                                    .Text(visit.Reason ?? string.Empty).FontSize(9).FontColor(Colors.Grey.Darken2);
+                            }
+                        });
+                    }
+                });
+
+                // Page Footer
+                page.Footer().Column(col =>
+                {
+                    col.Item().Height(1).Background(Colors.Grey.Lighten2);
+                    col.Item().PaddingTop(5);
+                    col.Item().Row(row =>
+                    {
+                        row.RelativeItem().Text("Clinic \u2022 Internal Schedule Distribution Framework").FontSize(8).FontColor(Colors.Grey.Darken1);
+                        row.RelativeItem().AlignRight().Text(x =>
+                        {
+                            x.Span("Page ").FontSize(8).FontColor(Colors.Grey.Darken1);
+                            x.CurrentPageNumber().FontSize(8).FontColor(Colors.Grey.Darken1);
+                            x.Span(" of ").FontSize(8).FontColor(Colors.Grey.Darken1);
+                            x.TotalPages().FontSize(8).FontColor(Colors.Grey.Darken1);
+                        });
+                    });
+                });
+            });
+        }).GeneratePdf();
+
+        return document;
+    }
 }
