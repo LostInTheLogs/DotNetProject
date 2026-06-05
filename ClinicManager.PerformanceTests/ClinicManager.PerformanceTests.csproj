@@ -8,4 +8,9 @@
      <AllowMissingPrunePackageData>true</AllowMissingPrunePackageData>
    </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NBomber" Version="6.4.1" />
+    <PackageReference Include="NBomber.Http" Version="6.2.0" />
+  </ItemGroup>
+
 </Project>
