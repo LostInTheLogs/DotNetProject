@@ -54,6 +54,16 @@
                                 </li>
                             }
 
+                            @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Reports" asp-action="Index"
+                                       id="nav-reports">
+                                        Reports
+                                    </a>
+                                </li>
+                            }
+
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">

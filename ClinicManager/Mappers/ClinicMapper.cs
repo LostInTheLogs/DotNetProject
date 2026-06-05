@@ -121,6 +121,7 @@ public partial class ClinicMapper
     private string MapPatientToPatientFullName(Patient patient) =>
         $"{patient.FirstName} {patient.LastName}";
 
+    [UserMapping(Default = true)]
     private string MapApplicationUserToDoctorFullName(ApplicationUser doctor) =>
         $"{doctor.FirstName} {doctor.LastName}";
 

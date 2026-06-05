@@ -48,6 +48,7 @@ builder.Services.AddScoped<IMedicationService, MedicationService>();
 builder.Services.AddScoped<IMedicalProcedureService, MedicalProcedureService>();
 builder.Services.AddScoped<IClinicalNoteService, ClinicalNoteService>();
 builder.Services.AddScoped<IPdfService, PdfService>();
+builder.Services.AddScoped<IServiceCostReportService, ServiceCostReportService>();
 
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();

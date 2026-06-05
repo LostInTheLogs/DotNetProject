@@ -355,4 +355,135 @@ public class PdfService : IPdfService
 
         return document;
     }
+
+    public byte[] GenerateServiceCostReportPdf(ServiceCostReportDto report)
+    {
+        var document = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(30);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontFamily("Arial").FontSize(9));
+
+                page.Header().Column(col =>
+                {
+                    col.Item().Row(row =>
+                    {
+                        row.RelativeItem().Text("THE ABYSMAL MEDICAL CENTER").FontSize(16).Bold().FontColor(Color.FromHex("#1A365D"));
+                        row.RelativeItem().AlignRight().Column(rCol =>
+                        {
+                            rCol.Item().Text("SERVICE COST REPORT").FontSize(14).Bold().FontColor(Color.FromHex("#1A365D")).AlignRight();
+                            rCol.Item().Text($"Generated: {DateTime.Now:yyyy-MM-dd HH:mm}").FontSize(8).FontColor(Colors.Grey.Darken1).AlignRight();
+                        });
+                    });
+                    col.Item().Height(1.5f).Background(Color.FromHex("#1A365D"));
+                    col.Item().PaddingBottom(8);
+                    col.Item().Text(report.FilterDescription).FontSize(10).Italic().FontColor(Colors.Grey.Darken1);
+                    col.Item().PaddingBottom(6);
+                });
+
+                page.Content().Column(col =>
+                {
+                    col.Item().Row(summaryRow =>
+                    {
+                        summaryRow.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Background(Colors.Grey.Lighten5).Padding(8).Column(sCol =>
+                        {
+                            sCol.Item().Text("SUMMARY").FontSize(10).Bold().FontColor(Color.FromHex("#1A365D"));
+                            sCol.Item().PaddingBottom(4);
+                            sCol.Item().Row(r =>
+                            {
+                                r.RelativeItem().Text("Total Visits:").SemiBold();
+                                r.RelativeItem().Text(report.TotalVisits.ToString()).AlignRight();
+                            });
+                            sCol.Item().Row(r =>
+                            {
+                                r.RelativeItem().Text("Grand Total:").SemiBold();
+                                r.RelativeItem().Text(report.GrandTotal.ToString("C", CurrencyCulture)).AlignRight().Bold();
+                            });
+                        });
+                    });
+
+                    col.Item().PaddingBottom(10);
+
+                    if (report.Lines.Count == 0)
+                    {
+                        col.Item().Text("No completed visits found matching the selected criteria.").Italic().FontColor(Colors.Grey.Darken1);
+                    }
+                    else
+                    {
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(50);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2.5f);
+                                columns.RelativeColumn(3);
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(1.5f);
+                            });
+
+                            table.Header(header =>
+                            {
+                                void HCell(string text)
+                                {
+                                    header.Cell().Background(Color.FromHex("#1A365D")).Padding(5)
+                                        .Text(text).Bold().FontColor(Colors.White).FontSize(8);
+                                }
+
+                                HCell("Visit #");
+                                HCell("Date");
+                                HCell("Patient");
+                                HCell("Doctor");
+                                HCell("Procs");
+                                HCell("Meds");
+                                header.Cell().Background(Color.FromHex("#1A365D")).Padding(5)
+                                    .Text("Total Cost").Bold().FontColor(Colors.White).FontSize(8).AlignRight();
+                            });
+
+                            foreach (var line in report.Lines)
+                            {
+                                void DCell(string text)
+                                {
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4)
+                                        .Text(text).FontSize(8);
+                                }
+
+                                DCell($"#{line.VisitId}");
+                                DCell(line.ScheduledDate.ToString("yyyy-MM-dd HH:mm"));
+                                DCell(line.PatientName);
+                                DCell(line.DoctorName);
+                                DCell(line.ProcedureCount.ToString());
+                                DCell(line.MedicationCount.ToString());
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4)
+                                    .Text(line.TotalCost.ToString("C", CurrencyCulture)).FontSize(8).AlignRight();
+                            }
+                        });
+                    }
+                });
+
+                page.Footer().Column(fCol =>
+                {
+                    fCol.Item().Height(1).Background(Colors.Grey.Lighten2);
+                    fCol.Item().PaddingTop(4);
+                    fCol.Item().Row(row =>
+                    {
+                        row.RelativeItem().Text("Clinic &bull; Confidential Financial Report").FontSize(7).FontColor(Colors.Grey.Darken1);
+                        row.RelativeItem().AlignRight().Text(x =>
+                        {
+                            x.Span("Page ").FontSize(7).FontColor(Colors.Grey.Darken1);
+                            x.CurrentPageNumber().FontSize(7).FontColor(Colors.Grey.Darken1);
+                            x.Span(" of ").FontSize(7).FontColor(Colors.Grey.Darken1);
+                            x.TotalPages().FontSize(7).FontColor(Colors.Grey.Darken1);
+                        });
+                    });
+                });
+            });
+        }).GeneratePdf();
+
+        return document;
+    }
 }
