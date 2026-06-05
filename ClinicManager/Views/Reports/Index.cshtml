@@ -1,0 +1,188 @@
+@model ClinicManager.DTOs.ServiceCostReportDto
+@using System.Globalization
+@{
+    ViewData["Title"] = "Service Cost Report";
+    var currencyCulture = CultureInfo.GetCultureInfo("en-US");
+    var selectedPatientId = Context.Request.Query["PatientId"].FirstOrDefault();
+    var selectedDoctorId = Context.Request.Query["DoctorId"].FirstOrDefault();
+    var selectedMonth = Context.Request.Query["Month"].FirstOrDefault();
+    var selectedYear = Context.Request.Query["Year"].FirstOrDefault();
+
+    var months = new[]
+    {
+        new { Value = 1, Name = "January" }, new { Value = 2, Name = "February" },
+        new { Value = 3, Name = "March" }, new { Value = 4, Name = "April" },
+        new { Value = 5, Name = "May" }, new { Value = 6, Name = "June" },
+        new { Value = 7, Name = "July" }, new { Value = 8, Name = "August" },
+        new { Value = 9, Name = "September" }, new { Value = 10, Name = "October" },
+        new { Value = 11, Name = "November" }, new { Value = 12, Name = "December" }
+    };
+    var currentYear = DateTime.Now.Year;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-0">Service Cost Report</h1>
+        <p class="text-muted small mb-0">Track financial performance by patient, doctor, or period</p>
+    </div>
+    @if (Model.Lines.Count > 0)
+    {
+        <a asp-action="ExportPdf"
+           asp-route-PatientId="@selectedPatientId"
+           asp-route-DoctorId="@selectedDoctorId"
+           asp-route-Month="@selectedMonth"
+           asp-route-Year="@selectedYear"
+           class="btn btn-primary">
+            <i class="bi bi-file-earmark-pdf me-1"></i>Export to PDF
+        </a>
+    }
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small">Patient</label>
+                <select name="PatientId" class="form-select form-select-sm">
+                    <option value="">-- All Patients --</option>
+                    @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.PatientList)
+                    {
+                        var isSelected = item.Value == selectedPatientId;
+                        <option value="@item.Value" selected="@isSelected">@item.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small">Doctor</label>
+                <select name="DoctorId" class="form-select form-select-sm">
+                    <option value="">-- All Doctors --</option>
+                    @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.DoctorList)
+                    {
+                        var isSelected = item.Value == selectedDoctorId;
+                        <option value="@item.Value" selected="@isSelected">@item.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold small">Month</label>
+                <select name="Month" class="form-select form-select-sm">
+                    <option value="">-- All --</option>
+                    @foreach (var m in months)
+                    {
+                        var isSelected = m.Value.ToString() == selectedMonth;
+                        <option value="@m.Value" selected="@isSelected">@m.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold small">Year</label>
+                <select name="Year" class="form-select form-select-sm">
+                    <option value="">-- All --</option>
+                    @for (int y = currentYear - 2; y <= currentYear + 1; y++)
+                    {
+                        var isSelected = y.ToString() == selectedYear;
+                        <option value="@y" selected="@isSelected">@y</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm flex-fill">
+                    <i class="bi bi-search me-1"></i>Generate
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm flex-fill">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Lines.Count > 0)
+{
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm bg-primary text-white">
+                <div class="card-body text-center py-3">
+                    <div class="small opacity-75">Total Visits</div>
+                    <div class="fs-3 fw-bold">@Model.TotalVisits</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm bg-success text-white">
+                <div class="card-body text-center py-3">
+                    <div class="small opacity-75">Grand Total</div>
+                    <div class="fs-3 fw-bold">@Model.GrandTotal.ToString("C", currencyCulture)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Reason</th>
+                            <th class="text-center">Procedures</th>
+                            <th class="text-center">Medications</th>
+                            <th class="text-end">Total Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var line in Model.Lines)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@line.VisitId</td>
+                                <td class="text-nowrap">@line.ScheduledDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>@line.PatientName</td>
+                                <td>@line.DoctorName</td>
+                                <td class="text-muted text-truncate" style="max-width: 200px;">@line.Reason</td>
+                                <td class="text-center"><span class="badge bg-info">@line.ProcedureCount</span></td>
+                                <td class="text-center"><span class="badge bg-warning text-dark">@line.MedicationCount</span></td>
+                                <td class="fw-semibold text-end text-nowrap">@line.TotalCost.ToString("C", currencyCulture)</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td colspan="7" class="text-end">Grand Total:</td>
+                            <td class="text-end text-nowrap">@Model.GrandTotal.ToString("C", currencyCulture)</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else if (ViewBag.PatientList != null)
+{
+    <div class="text-center py-5">
+        <p class="text-muted mb-0">No completed visits found matching the selected criteria.</p>
+    </div>
+}
+else
+{
+    <div class="text-center py-5">
+        <p class="text-muted mb-0">Select filter criteria and click "Generate" to view the report.</p>
+    </div>
+}

@@ -7,7 +7,7 @@ public class ProcedurePerformed
     public int Id { get; set; }
 
     public int VisitId { get; set; }
-    public Visit Visit { get; set; }
+    public Visit Visit { get; set; } = null!;
 
     public int MedicalProcedureId { get; set; }
     public MedicalProcedure? MedicalProcedure { get; set; }
