@@ -66,3 +66,8 @@ Before running the application for the first time, restore the local repository 
    ```bash
    dotnet run --project ClinicManager
    ```
+
+For testing the email sevice:
+```bash
+docker run -p 1080:1080 -p 1025:1025 maildev/maildev 
+```

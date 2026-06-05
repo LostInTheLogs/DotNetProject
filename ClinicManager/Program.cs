@@ -1,3 +1,4 @@
+using ClinicManager.BackgroundServices;
 using ClinicManager.Data;
 using ClinicManager.Mappers;
 using ClinicManager.Services;
@@ -49,6 +50,7 @@ builder.Services.AddScoped<IMedicalProcedureService, MedicalProcedureService>();
 builder.Services.AddScoped<IClinicalNoteService, ClinicalNoteService>();
 builder.Services.AddScoped<IPdfService, PdfService>();
 builder.Services.AddScoped<IServiceCostReportService, ServiceCostReportService>();
+builder.Services.AddHostedService<UpcomingVisitsReportBackgroundService>();
 
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();
