@@ -43,7 +43,7 @@ public class PatientService(
 
         if (searchTerm.Length == 11 && searchTerm.All(char.IsDigit))
         {
-            query = query.Where(p => p.Pesel.Contains(searchTerm));
+            query = query.Where(p => p.Pesel == searchTerm);
         }
         else
         {

@@ -36,10 +36,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasIndex(p => p.Pesel)
             .IsUnique()
             .HasDatabaseName("IX_Patients_PESEL_Unique");
-
+        
         modelBuilder.Entity<Visit>()
             .HasIndex(v => new { v.DoctorId, v.ScheduledDate })
-            .HasDatabaseName("IX_Visits_Doctor_Schedule");
+            .HasDatabaseName("IX_Visits_DoctorId_ScheduledDate")
+            .IncludeProperties(v => new { v.PatientId, v.Status, v.Reason });
 
         // --- Relationships & Mappings ---
         modelBuilder.Entity<Visit>()
