@@ -36,7 +36,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasIndex(p => p.Pesel)
             .IsUnique()
             .HasDatabaseName("IX_Patients_PESEL_Unique");
-        
+
         modelBuilder.Entity<Visit>()
             .HasIndex(v => new { v.DoctorId, v.ScheduledDate })
             .HasDatabaseName("IX_Visits_DoctorId_ScheduledDate")
