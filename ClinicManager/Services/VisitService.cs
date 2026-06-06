@@ -47,12 +47,13 @@ public class VisitService(ApplicationDbContext context, ClinicMapper mapper) : I
 
     public async Task<IEnumerable<VisitResponseDto>> GetByDoctorScheduleAsync(string doctorId, DateTime date)
     {
-        var targetDate = date.Date;
+        var startDate = date.Date;
+        var endDate = startDate.AddDays(1);
         var visits = await context.Visits
             .Include(v => v.Patient)
             .Include(v => v.Doctor)
             .AsNoTracking()
-            .Where(v => v.DoctorId == doctorId && v.ScheduledDate.Date == targetDate)
+            .Where(v => v.DoctorId == doctorId && v.ScheduledDate >= startDate && v.ScheduledDate < endDate)
             .OrderBy(v => v.ScheduledDate)
             .ToListAsync();
 

@@ -4,6 +4,7 @@ using ClinicManager.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClinicManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260606133901_RemoveIndexes")]
+    partial class RemoveIndexes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -278,10 +281,6 @@ namespace ClinicManager.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Pesel")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Patients_PESEL_Unique");
-
                     b.ToTable("Patients");
                 });
 
@@ -392,12 +391,9 @@ namespace ClinicManager.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DoctorId");
+
                     b.HasIndex("PatientId");
-
-                    b.HasIndex("DoctorId", "ScheduledDate")
-                        .HasDatabaseName("IX_Visits_DoctorId_ScheduledDate");
-
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("DoctorId", "ScheduledDate"), new[] { "PatientId", "Status", "Reason" });
 
                     b.ToTable("Visits");
                 });

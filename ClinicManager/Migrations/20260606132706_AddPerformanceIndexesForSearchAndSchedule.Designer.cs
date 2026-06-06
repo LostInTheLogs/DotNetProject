@@ -4,6 +4,7 @@ using ClinicManager.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClinicManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260606132706_AddPerformanceIndexesForSearchAndSchedule")]
+    partial class AddPerformanceIndexesForSearchAndSchedule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -281,6 +284,14 @@ namespace ClinicManager.Migrations
                     b.HasIndex("Pesel")
                         .IsUnique()
                         .HasDatabaseName("IX_Patients_PESEL_Unique");
+
+                    b.HasIndex("Pesel", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("IX_Patients_Pesel_CreatedAt");
+
+                    b.HasIndex("LastName", "FirstName", "CreatedAt")
+                        .IsDescending(false, false, true)
+                        .HasDatabaseName("IX_Patients_LastName_FirstName_CreatedAt");
 
                     b.ToTable("Patients");
                 });
