@@ -8,7 +8,7 @@ using ClinicManager.Services;
 
 namespace ClinicManager.Controllers;
 
-[Authorize(Roles = "Admin,Doctor")]
+[Authorize(Roles = "Admin")]
 public class ReportsController(
     IServiceCostReportService reportService,
     IPatientService patientService,

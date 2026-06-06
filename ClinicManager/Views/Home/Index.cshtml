@@ -1,8 +1,232 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@* Welcome Section *@
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm bg-primary text-white">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-person-circle fs-1"></i>
+                    <div>
+                        <h4 class="mb-1">Welcome, @ViewBag.UserFullName</h4>
+                        <p class="mb-0 opacity-75">
+                            <span class="badge bg-light text-primary fs-6">@ViewBag.Role</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Stats Cards *@
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small mb-1">Total Patients</p>
+                        <h3 class="fw-bold mb-0">@ViewBag.TotalPatients</h3>
+                    </div>
+                    <div class="rounded-3 bg-info bg-opacity-10 p-3">
+                        <i class="bi bi-people fs-3 text-info"></i>
+                    </div>
+                </div>
+                <a asp-controller="Patient" asp-action="Index" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+
+    @if (User.IsInRole("Doctor"))
+    {
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">My Visits Today</p>
+                            <h3 class="fw-bold mb-0">@ViewBag.MyTodayVisits</h3>
+                        </div>
+                        <div class="rounded-3 bg-warning bg-opacity-10 p-3">
+                            <i class="bi bi-calendar-check fs-3 text-warning"></i>
+                        </div>
+                    </div>
+                    <a asp-controller="Visit" asp-action="Calendar" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Visits Today</p>
+                            <h3 class="fw-bold mb-0">@ViewBag.TodayVisits</h3>
+                        </div>
+                        <div class="rounded-3 bg-warning bg-opacity-10 p-3">
+                            <i class="bi bi-calendar-check fs-3 text-warning"></i>
+                        </div>
+                    </div>
+                    <a asp-controller="Visit" asp-action="Calendar" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small mb-1">Scheduled</p>
+                        <h3 class="fw-bold mb-0">@ViewBag.ScheduledVisits</h3>
+                    </div>
+                    <div class="rounded-3 bg-primary bg-opacity-10 p-3">
+                        <i class="bi bi-clock-history fs-3 text-primary"></i>
+                    </div>
+                </div>
+                <a asp-controller="Visit" asp-action="Calendar" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small mb-1">Completed</p>
+                        <h3 class="fw-bold mb-0">@ViewBag.CompletedVisits</h3>
+                    </div>
+                    <div class="rounded-3 bg-success bg-opacity-10 p-3">
+                        <i class="bi bi-check2-circle fs-3 text-success"></i>
+                    </div>
+                </div>
+                <a asp-controller="Visit" asp-action="Calendar" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Staff Members</p>
+                            <h3 class="fw-bold mb-0">@ViewBag.TotalStaff</h3>
+                        </div>
+                        <div class="rounded-3 bg-danger bg-opacity-10 p-3">
+                            <i class="bi bi-person-badge fs-3 text-danger"></i>
+                        </div>
+                    </div>
+                    <a asp-controller="Admin" asp-action="Users" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@* Quick Navigation Cards *@
+<h5 class="fw-bold mb-3">Quick Actions</h5>
+<div class="row g-3">
+    <div class="col-md-6 col-lg-4 col-xl-3">
+        <a asp-controller="Patient" asp-action="Index" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body text-center p-4">
+                    <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex p-3 mb-3">
+                        <i class="bi bi-people fs-2 text-info"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Patients</h6>
+                    <p class="text-muted small mb-0">Manage patient records</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4 col-xl-3">
+        <a asp-controller="Visit" asp-action="Calendar" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body text-center p-4">
+                    <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex p-3 mb-3">
+                        <i class="bi bi-calendar-event fs-2 text-warning"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Visits</h6>
+                    <p class="text-muted small mb-0">Schedule and manage visits</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+    {
+        <div class="col-md-6 col-lg-4 col-xl-3">
+            <a asp-controller="Medication" asp-action="Index" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100 dashboard-card">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex p-3 mb-3">
+                            <i class="bi bi-capsule fs-2 text-success"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">Medications</h6>
+                        <p class="text-muted small mb-0">Manage medication catalog</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6 col-lg-4 col-xl-3">
+            <a asp-controller="MedicalProcedure" asp-action="Index" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100 dashboard-card">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex p-3 mb-3">
+                            <i class="bi bi-activity fs-2 text-primary"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">Procedures</h6>
+                        <p class="text-muted small mb-0">Manage procedure catalog</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    }
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="col-md-6 col-lg-4 col-xl-3">
+            <a asp-controller="Reports" asp-action="Index" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100 dashboard-card">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-danger bg-opacity-10 d-inline-flex p-3 mb-3">
+                            <i class="bi bi-bar-chart-line fs-2 text-danger"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">Reports</h6>
+                        <p class="text-muted small mb-0">View service cost reports</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    }
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="col-md-6 col-lg-4 col-xl-3">
+            <a asp-controller="Admin" asp-action="Users" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100 dashboard-card">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-secondary bg-opacity-10 d-inline-flex p-3 mb-3">
+                            <i class="bi bi-person-badge fs-2 text-secondary"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">Clinic Staff</h6>
+                        <p class="text-muted small mb-0">Manage staff accounts and roles</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    }
 </div>
