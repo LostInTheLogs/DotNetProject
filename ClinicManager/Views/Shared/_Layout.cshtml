@@ -11,55 +11,72 @@
     <link rel="stylesheet" href="~/ClinicManager.styles.css" asp-append-version="true" />
 </head>
 <body>
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    bool IsActive(string ctrl, string? act = null) =>
+        string.Equals(controller, ctrl, StringComparison.OrdinalIgnoreCase) &&
+        (act == null || string.Equals(action, act, StringComparison.OrdinalIgnoreCase));
+}
+
     <header>
-        <nav class="navbar navbar-expand-sm navbar-dark bg-primary shadow-sm mb-3">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
-                    🏥 ClinicManager
+                    <i class="bi bi-hospital me-1"></i>ClinicManager
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
                         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link @(IsActive("Home") ? "active" : "")" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                            </a>
                         </li>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Patient" asp-action="Index" id="nav-patients">
-                                    Patients
+                                <a class="nav-link @(IsActive("Patient") ? "active" : "")" asp-controller="Patient" asp-action="Index">
+                                    <i class="bi bi-people me-1"></i>Patients
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Visit" asp-action="Calendar" id="nav-patients">
-                                    Visits
+                                <a class="nav-link @(IsActive("Visit") ? "active" : "")" asp-controller="Visit" asp-action="Calendar">
+                                    <i class="bi bi-calendar-event me-1"></i>Visits
                                 </a>
                             </li>
                             @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Medication" asp-action="Index"
-                                       id="nav-patients">
-                                        Medications
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle @(IsActive("Medication") || IsActive("MedicalProcedure") ? "active" : "")"
+                                       href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="bi bi-journal-text me-1"></i>Catalog
                                     </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="MedicalProcedure" asp-action="Index"
-                                       id="nav-patients">
-                                        Procedures
-                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item @(IsActive("Medication") ? "active" : "")"
+                                               asp-controller="Medication" asp-action="Index">
+                                                <i class="bi bi-capsule me-2"></i>Medications
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item @(IsActive("MedicalProcedure") ? "active" : "")"
+                                               asp-controller="MedicalProcedure" asp-action="Index">
+                                                <i class="bi bi-activity me-2"></i>Procedures
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </li>
                             }
 
-                            @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+                            @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Reports" asp-action="Index"
-                                       id="nav-reports">
-                                        Reports
+                                    <a class="nav-link @(IsActive("Reports") ? "active" : "")" asp-controller="Reports" asp-action="Index">
+                                        <i class="bi bi-bar-chart-line me-1"></i>Reports
                                     </a>
                                 </li>
                             }
@@ -67,8 +84,8 @@
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Admin" asp-action="Users" id="nav-admin-users">
-                                        👥 Clinic Staff
+                                    <a class="nav-link @(IsActive("Admin") ? "active" : "")" asp-controller="Admin" asp-action="Users">
+                                        <i class="bi bi-person-badge me-1"></i>Staff
                                     </a>
                                 </li>
                             }
@@ -80,13 +97,13 @@
                         {
                             <li class="nav-item">
                                 <span class="nav-link text-light">
-                                    👤 @User.Identity.Name
+                                    <i class="bi bi-person-circle me-1"></i>@User.Identity.Name
                                 </span>
                             </li>
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline" id="logout-form">
-                                    <button type="submit" class="btn btn-outline-light btn-sm my-1" id="nav-logout">
-                                        🚪 Logout
+                                    <button type="submit" class="btn btn-outline-light btn-sm my-1">
+                                        <i class="bi bi-box-arrow-right me-1"></i>Logout
                                     </button>
                                 </form>
                             </li>
@@ -95,7 +112,7 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Account" asp-action="Login" id="nav-login">
-                                    🔑 Sign In
+                                    <i class="bi bi-key me-1"></i>Sign In
                                 </a>
                             </li>
                         }
@@ -105,7 +122,7 @@
         </nav>
     </header>
 
-    <div class="container">
+    <div class="container-fluid px-4">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
@@ -113,7 +130,7 @@
 
     <footer class="border-top footer text-muted mt-4">
         <div class="container py-2">
-            &copy; 2026 - ClinicManager
+            <i class="bi bi-hospital me-1"></i>&copy; 2026 - ClinicManager
         </div>
     </footer>
 
