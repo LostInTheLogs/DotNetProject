@@ -78,8 +78,12 @@ public class VisitServiceTests
         var slot = new DateTime(2026, 6, 15, 10, 0, 0, DateTimeKind.Utc);
         context.Visits.Add(new Visit
         {
-            Id = 1, PatientId = 1, DoctorId = "doc-1", ScheduledDate = slot,
-            Status = VisitStatus.Scheduled, Reason = "Existing"
+            Id = 1,
+            PatientId = 1,
+            DoctorId = "doc-1",
+            ScheduledDate = slot,
+            Status = VisitStatus.Scheduled,
+            Reason = "Existing"
         });
         await context.SaveChangesAsync();
 
@@ -99,8 +103,12 @@ public class VisitServiceTests
         var slot = new DateTime(2026, 6, 15, 10, 0, 0, DateTimeKind.Utc);
         context.Visits.Add(new Visit
         {
-            Id = 1, PatientId = 1, DoctorId = "doc-1", ScheduledDate = slot,
-            Status = VisitStatus.Cancelled, Reason = "Cancelled"
+            Id = 1,
+            PatientId = 1,
+            DoctorId = "doc-1",
+            ScheduledDate = slot,
+            Status = VisitStatus.Cancelled,
+            Reason = "Cancelled"
         });
         await context.SaveChangesAsync();
 
@@ -275,9 +283,13 @@ public class VisitServiceTests
 
         context.Visits.Add(new Visit
         {
-            Id = 5, PatientId = 1, DoctorId = "doc-1",
+            Id = 5,
+            PatientId = 1,
+            DoctorId = "doc-1",
             ScheduledDate = new DateTime(2026, 6, 15, 10, 0, 0, DateTimeKind.Utc),
-            Status = VisitStatus.Completed, Reason = "Checkup", TotalCost = 150.00m + 37.50m,
+            Status = VisitStatus.Completed,
+            Reason = "Checkup",
+            TotalCost = 150.00m + 37.50m,
             ProceduresPerformed = new List<ProcedurePerformed>
             {
                 new() { Id = 1, MedicalProcedureId = 10, ActualCost = 150.00m, Notes = "Routine" }

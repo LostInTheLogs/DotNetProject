@@ -91,8 +91,13 @@ public class PatientServiceTests
 
         context.Patients.Add(new Patient
         {
-            Id = 99, FirstName = "Jan", LastName = "Kowalski", Pesel = "12345678901",
-            InsuranceNumber = "INS01", Phone = "+48123456789", Email = "jan@test.com",
+            Id = 99,
+            FirstName = "Jan",
+            LastName = "Kowalski",
+            Pesel = "12345678901",
+            InsuranceNumber = "INS01",
+            Phone = "+48123456789",
+            Email = "jan@test.com",
             Address = "Ul. Testowa 1"
         });
         await context.SaveChangesAsync();
@@ -211,8 +216,14 @@ public class PatientServiceTests
 
         context.Patients.Add(new Patient
         {
-            Id = 1, FirstName = "Old", LastName = "Name", Pesel = "12345678901",
-            InsuranceNumber = "I1", Phone = "+481", Email = "old@test.com", Address = "Old"
+            Id = 1,
+            FirstName = "Old",
+            LastName = "Name",
+            Pesel = "12345678901",
+            InsuranceNumber = "I1",
+            Phone = "+481",
+            Email = "old@test.com",
+            Address = "Old"
         });
         await context.SaveChangesAsync();
 
@@ -249,8 +260,14 @@ public class PatientServiceTests
 
         context.Patients.Add(new Patient
         {
-            Id = 1, FirstName = "Jan", LastName = "Kowalski", Pesel = "12345678901",
-            InsuranceNumber = "I1", Phone = "+481", Email = "j@t.com", Address = "Addr"
+            Id = 1,
+            FirstName = "Jan",
+            LastName = "Kowalski",
+            Pesel = "12345678901",
+            InsuranceNumber = "I1",
+            Phone = "+481",
+            Email = "j@t.com",
+            Address = "Addr"
         });
         await context.SaveChangesAsync();
 
@@ -282,8 +299,14 @@ public class PatientServiceTests
 
         context.Patients.Add(new Patient
         {
-            Id = 1, FirstName = "Jan", LastName = "Kowalski", Pesel = "12345678901",
-            InsuranceNumber = "I1", Phone = "+481", Email = "j@t.com", Address = "Addr",
+            Id = 1,
+            FirstName = "Jan",
+            LastName = "Kowalski",
+            Pesel = "12345678901",
+            InsuranceNumber = "I1",
+            Phone = "+481",
+            Email = "j@t.com",
+            Address = "Addr",
             IsDeleted = true
         });
         await context.SaveChangesAsync();
