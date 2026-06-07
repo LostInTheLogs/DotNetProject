@@ -37,12 +37,13 @@ public class VisitService(ApplicationDbContext context, ClinicMapper mapper) : I
 
     public async Task<VisitResponseDto?> GetByIdAsync(int id)
     {
-        return await context.Visits
+        var visit = await context.Visits
             .Include(v => v.Patient)
             .Include(v => v.Doctor)
             .AsNoTracking()
-            .Select(v => mapper.VisitToResponseDto(v))
             .FirstOrDefaultAsync(v => v.Id == id);
+
+        return visit is null ? null : mapper.VisitToResponseDto(visit);
     }
 
     public async Task<IEnumerable<VisitResponseDto>> GetByDoctorScheduleAsync(string doctorId, DateTime date)
@@ -63,6 +64,7 @@ public class VisitService(ApplicationDbContext context, ClinicMapper mapper) : I
     public async Task<IEnumerable<VisitResponseDto>> GetPatientVisitHistoryAsync(int patientId)
     {
         var visits = await context.Visits
+            .Include(v => v.Patient)
             .Include(v => v.Doctor)
             .AsNoTracking()
             .Where(v => v.PatientId == patientId)
