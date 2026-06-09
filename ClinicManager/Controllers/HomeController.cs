@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace ClinicManager.Controllers;
 
 [Authorize]
-public class HomeController(ILogger<HomeController> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager) : Controller
+public class HomeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager) : Controller
 {
     public async Task<IActionResult> Index()
     {
