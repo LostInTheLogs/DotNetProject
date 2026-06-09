@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace ClinicManager.Controllers;
 
 [Authorize(Roles = "Admin,Doctor,Receptionist")]
-public class VisitController(IVisitService visitService, UserManager<ApplicationUser> userManager, IPatientService patientService, IMedicationService medicationService, IClinicalNoteService clinicalNoteService, IPdfService pdfService) : Controller
+public class VisitController(IVisitService visitService, UserManager<ApplicationUser> userManager, IPatientService patientService, IMedicationService medicationService, IClinicalNoteService clinicalNoteService, IPdfService pdfService, ILogger<VisitController> logger) : Controller
 {
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -18,10 +18,12 @@ public class VisitController(IVisitService visitService, UserManager<Application
         try
         {
             await visitService.UpdateStatusAsync(id, newStatus);
+            logger.LogInformation("Visit {VisitId} status changed to {Status}.", id, newStatus);
             TempData["Success"] = $"Visit changed to {newStatus}.";
         }
         catch (Exception ex)
         {
+            logger.LogWarning(ex, "Failed to update status for visit {VisitId}.", id);
             TempData["Error"] = ex.Message;
         }
 
@@ -71,7 +73,6 @@ public class VisitController(IVisitService visitService, UserManager<Application
         return View(viewModel);
     }
 
-    // POST: /Visit/Book
     // GET: /Visit/Manage/{id}
     [HttpGet]
     public async Task<IActionResult> Manage(int id)
@@ -107,10 +108,12 @@ public class VisitController(IVisitService visitService, UserManager<Application
         try
         {
             await visitService.AddProcedureAsync(visitId, dto);
+            logger.LogInformation("Procedure {ProcedureId} added to visit {VisitId}.", dto.MedicalProcedureId, visitId);
             TempData["Success"] = "Procedure added to visit.";
         }
         catch (Exception ex)
         {
+            logger.LogWarning(ex, "Failed to add procedure to visit {VisitId}.", visitId);
             TempData["Error"] = ex.Message;
         }
 
@@ -125,10 +128,12 @@ public class VisitController(IVisitService visitService, UserManager<Application
         try
         {
             await visitService.RemoveProcedureAsync(procedureId);
+            logger.LogInformation("Procedure {ProcedureId} removed from visit {VisitId}.", procedureId, visitId);
             TempData["Success"] = "Procedure removed from visit.";
         }
         catch (Exception ex)
         {
+            logger.LogWarning(ex, "Failed to remove procedure {ProcedureId} from visit {VisitId}.", procedureId, visitId);
             TempData["Error"] = ex.Message;
         }
 
@@ -143,10 +148,12 @@ public class VisitController(IVisitService visitService, UserManager<Application
         try
         {
             await visitService.AddPrescriptionAsync(visitId, dto);
+            logger.LogInformation("Prescription (medication {MedicationId}) added to visit {VisitId}.", dto.MedicationId, visitId);
             TempData["Success"] = "Prescription added to visit.";
         }
         catch (Exception ex)
         {
+            logger.LogWarning(ex, "Failed to add prescription to visit {VisitId}.", visitId);
             TempData["Error"] = ex.Message;
         }
 
@@ -161,10 +168,12 @@ public class VisitController(IVisitService visitService, UserManager<Application
         try
         {
             await visitService.RemovePrescriptionAsync(prescriptionId);
+            logger.LogInformation("Prescription {PrescriptionId} removed from visit {VisitId}.", prescriptionId, visitId);
             TempData["Success"] = "Prescription removed from visit.";
         }
         catch (Exception ex)
         {
+            logger.LogWarning(ex, "Failed to remove prescription {PrescriptionId} from visit {VisitId}.", prescriptionId, visitId);
             TempData["Error"] = ex.Message;
         }
 
@@ -182,10 +191,12 @@ public class VisitController(IVisitService visitService, UserManager<Application
             if (userId == null) return Unauthorized();
 
             await clinicalNoteService.CreateAsync(dto, userId);
+            logger.LogInformation("Clinical note ({NoteType}) added to visit {VisitId}.", dto.NoteType, dto.VisitId);
             TempData["Success"] = "Clinical note added.";
         }
         catch (Exception ex)
         {
+            logger.LogWarning(ex, "Failed to add clinical note to visit {VisitId}.", dto.VisitId);
             TempData["Error"] = ex.Message;
         }
 
@@ -200,16 +211,19 @@ public class VisitController(IVisitService visitService, UserManager<Application
         try
         {
             await clinicalNoteService.DeleteAsync(noteId);
+            logger.LogInformation("Clinical note {NoteId} deleted from visit {VisitId}.", noteId, visitId);
             TempData["Success"] = "Clinical note deleted.";
         }
         catch (Exception ex)
         {
+            logger.LogWarning(ex, "Failed to delete clinical note {NoteId} from visit {VisitId}.", noteId, visitId);
             TempData["Error"] = ex.Message;
         }
 
         return RedirectToAction(nameof(Manage), new { id = visitId });
     }
 
+    // POST: /Visit/Book
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Book(int patientId, string doctorId, DateTime scheduledDate, string reason)
@@ -224,10 +238,12 @@ public class VisitController(IVisitService visitService, UserManager<Application
             );
 
             await visitService.CreateVisitAsync(dto);
+            logger.LogInformation("Visit booked for patient {PatientId} with doctor {DoctorId} on {Date}.", patientId, doctorId, scheduledDate);
             TempData["Success"] = "Appointment booked successfully.";
         }
         catch (Exception ex)
         {
+            logger.LogWarning(ex, "Failed to book visit for patient {PatientId}.", patientId);
             TempData["Error"] = ex.Message;
         }
 
@@ -243,6 +259,7 @@ public class VisitController(IVisitService visitService, UserManager<Application
 
         if (visit.Status != VisitStatus.Completed)
         {
+            logger.LogWarning("Attempted to download summary for non-completed visit {VisitId}.", id);
             TempData["Error"] = "Visit summary PDF can only be generated for completed visits.";
             return RedirectToAction(nameof(Manage), new { id = id });
         }
@@ -255,6 +272,7 @@ public class VisitController(IVisitService visitService, UserManager<Application
         var pdfBytes = pdfService.GenerateVisitSummaryPdf(visit, patient, notes);
         var fileName = $"VisitSummary_{visit.Id}_{patient.LastName}.pdf";
 
+        logger.LogInformation("Visit summary PDF downloaded for visit {VisitId}.", id);
         return File(pdfBytes, "application/pdf", fileName);
     }
 
@@ -267,12 +285,14 @@ public class VisitController(IVisitService visitService, UserManager<Application
 
         if (visit.Status != VisitStatus.Completed)
         {
+            logger.LogWarning("Attempted to download prescription for non-completed visit {VisitId}.", id);
             TempData["Error"] = "Prescriptions can only be printed for completed visits.";
             return RedirectToAction(nameof(Manage), new { id = id });
         }
 
         if (!visit.Prescriptions.Any())
         {
+            logger.LogWarning("Attempted to download prescription for visit {VisitId} with no prescriptions.", id);
             TempData["Error"] = "No prescriptions were recorded for this visit.";
             return RedirectToAction(nameof(Manage), new { id = id });
         }
@@ -283,6 +303,7 @@ public class VisitController(IVisitService visitService, UserManager<Application
         var pdfBytes = pdfService.GeneratePrescriptionPdf(visit, patient);
         var fileName = $"Prescription_{visit.Id}_{patient.LastName}.pdf";
 
+        logger.LogInformation("Prescription PDF downloaded for visit {VisitId}.", id);
         return File(pdfBytes, "application/pdf", fileName);
     }
 }
