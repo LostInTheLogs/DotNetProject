@@ -6,7 +6,7 @@ using ClinicManager.Models;
 namespace ClinicManager.Controllers;
 
 [Authorize(Roles = "Admin,Receptionist")]
-public class MedicationController(IMedicationService medicationService) : Controller
+public class MedicationController(IMedicationService medicationService, ILogger<MedicationController> logger) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index()
@@ -30,11 +30,13 @@ public class MedicationController(IMedicationService medicationService) : Contro
         try
         {
             await medicationService.CreateAsync(dto);
+            logger.LogInformation("Medication '{Name}' created.", dto.Name);
             TempData["Success"] = $"{dto.Name} successfully added to inventory catalog.";
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
+            logger.LogWarning(ex, "Failed to create medication '{Name}'.", dto.Name);
             ModelState.AddModelError(string.Empty, ex.Message);
             return View(dto);
         }
@@ -67,11 +69,13 @@ public class MedicationController(IMedicationService medicationService) : Contro
         try
         {
             await medicationService.UpdateAsync(dto);
+            logger.LogInformation("Medication {Id} ('{Name}') updated.", dto.Id, dto.Name);
             TempData["Success"] = "Medication entry updated successfully.";
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
+            logger.LogWarning(ex, "Failed to update medication {Id}.", dto.Id);
             ModelState.AddModelError(string.Empty, ex.Message);
             return View(dto);
         }
@@ -84,10 +88,12 @@ public class MedicationController(IMedicationService medicationService) : Contro
         try
         {
             await medicationService.ToggleAvailabilityAsync(id);
+            logger.LogInformation("Medication {Id} availability toggled.", id);
             TempData["Success"] = "Medication availability status changed.";
         }
         catch (Exception ex)
         {
+            logger.LogWarning(ex, "Failed to toggle availability for medication {Id}.", id);
             TempData["Error"] = ex.Message;
         }
         return RedirectToAction(nameof(Index));

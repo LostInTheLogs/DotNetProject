@@ -71,3 +71,17 @@ For testing the email sevice:
 ```bash
 docker run -p 1080:1080 -p 1025:1025 maildev/maildev 
 ```
+
+To run tests:
+```bash
+dotnet test
+```
+
+To run performance tests (NBomber):
+```bash
+# start the database
+docker compose up -d
+
+dotnet run --project ClinicManager --urls=http://localhost:5000/
+dotnet run --project ClinicManager.PerformanceTests
+```
