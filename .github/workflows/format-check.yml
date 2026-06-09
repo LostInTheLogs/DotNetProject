@@ -22,8 +22,5 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore -p:AllowMissingPrunePackageData=true
       
-    - name: Build
-      run: dotnet build --no-restore -c Release -p:AllowMissingPrunePackageData=true
-      
     - name: Check formatting
       run: dotnet format --verify-no-changes --verbosity diagnostic
